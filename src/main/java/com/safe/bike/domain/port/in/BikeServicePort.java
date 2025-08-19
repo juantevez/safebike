@@ -9,6 +9,6 @@ public interface BikeServicePort {
 
     Optional<BikeEntity> getBikeById(Long id);
 
-    Optional<BikeEntity> getBikesByBrand(String brand);
+    Optional<BikeEntity> getBikesByBrand(Integer brand);
 
 }

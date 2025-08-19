@@ -41,7 +41,9 @@ public class BikeServiceImpl implements BikeServicePort {
     public Optional<BikeEntity> getBikeById(Long id) {
         return bikeRepositoryPort.findById(id);
     }
-    public Optional<BikeEntity> getBikesByBrand(String brand) {
+
+
+    public Optional<BikeEntity> getBikesByBrand(Integer brand) {
         return bikeRepositoryPort.findByBrand(brand);
     }
 

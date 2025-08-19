@@ -19,8 +19,8 @@ public class BikePersistenceAdapter implements BikeRepositoryPort {
     }
 
     @Override
-    public Optional<BikeEntity> findByBrand(String brand) {
-        return bikeRepository.findByBrand(brand);
+    public Optional<BikeEntity> findByBrand(Integer brand) {
+        return bikeRepository.findByBrandId(brand);
     }
 
     @Override

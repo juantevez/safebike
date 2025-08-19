@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface BikeRepositoryPort {
     void save(BikeEntity bike);
-    Optional<BikeEntity> findByBrand(String brand);
+    Optional<BikeEntity> findByBrand(Integer brand);
 
     Optional<BikeEntity> findById(Long bikeId);
 
