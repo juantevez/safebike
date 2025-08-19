@@ -19,6 +19,7 @@ pom.xml.releaseBackup
 logs/
 
 # Vaadin
+frontend/generated/flow
 /frontend/node_modules
 /frontend/target
 /node_modules
