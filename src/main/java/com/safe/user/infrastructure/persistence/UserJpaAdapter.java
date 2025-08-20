@@ -1,8 +1,8 @@
 package com.safe.user.infrastructure.persistence;
 
 
-import com.safe.user.domain.model.User;
-import com.safe.user.domain.port.UserRepositoryPort;
+import com.safe.user.domain.User;
+import com.safe.user.infrastructure.adapter.UserRepositoryPort;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
 

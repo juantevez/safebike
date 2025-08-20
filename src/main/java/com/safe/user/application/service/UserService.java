@@ -2,8 +2,8 @@ package com.safe.user.application.service;
 
 
 import com.safe.user.application.dto.UserDTO;
-import com.safe.user.domain.model.User;
-import com.safe.user.domain.port.UserRepositoryPort;
+import com.safe.user.domain.User;
+import com.safe.user.infrastructure.adapter.UserRepositoryPort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

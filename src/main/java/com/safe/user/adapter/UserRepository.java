@@ -2,7 +2,7 @@ package com.safe.user.adapter;
 
 
 
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

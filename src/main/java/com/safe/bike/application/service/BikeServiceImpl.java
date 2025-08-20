@@ -1,9 +1,8 @@
 package com.safe.bike.application.service;
 
 import com.safe.bike.domain.model.entity.BikeEntity;
-import com.safe.bike.domain.model.entity.BrandEntity;
 import com.safe.bike.domain.port.in.BikeServicePort;
-import com.safe.bike.infrastructure.persistence.BikeRepository;
+import com.safe.bike.infrastructure.persistence.bike.BikeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -33,7 +32,7 @@ public class BikeServiceImpl implements BikeServicePort {
     }
 
     @Override
-    public Optional<BikeEntity> getBikeById(BrandEntity id) {
+    public Optional<BikeEntity> getBikeById(Long id) {
         return bikeRepository.findById(id);
     }
 
@@ -50,6 +49,6 @@ public class BikeServiceImpl implements BikeServicePort {
     }
 
     public Optional<BikeEntity> getBikesByBrand(Integer brand) {
-        return bikeRepository.findByBrandId(brand);
+        return bikeRepository.findByBrand_BrandId(brand);
     }
 }

@@ -8,8 +8,7 @@ import java.util.Optional;
 
 public interface BikeServicePort {
     void save(BikeEntity bike);
-    Optional<BikeEntity> getBikeById(BrandEntity id);
-    // Agregar los métodos faltantes
-    Optional<BikeEntity> getBikesByBrand(Integer brand);
+    Optional<BikeEntity> getBikeById(Long id);
     List<BikeEntity> getAllBikes();
+    Optional<BikeEntity> getBikesByBrand(Integer brand); // Agregar este método
 }

@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        com.safe.user.domain.model.User user = userService.findByEmail(email);
+        com.safe.user.domain.User user = userService.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("Usuario no encontrado: " + email);
         }

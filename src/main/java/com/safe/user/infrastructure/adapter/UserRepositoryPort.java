@@ -1,7 +1,7 @@
-package com.safe.user.domain.port;
+package com.safe.user.infrastructure.adapter;
 
 
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.User;
 
 import java.util.Optional;
 

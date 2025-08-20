@@ -1,4 +1,4 @@
-package com.safe.user.domain.model;
+package com.safe.user.domain;
 
 import com.safe.bike.domain.model.entity.BikeEntity;
 import jakarta.persistence.*;

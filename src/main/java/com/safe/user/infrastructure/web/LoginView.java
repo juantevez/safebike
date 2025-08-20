@@ -43,7 +43,7 @@ public class LoginView extends VerticalLayout {
                 getUI().ifPresent(ui -> {
                     ui.getSession().setAttribute("authToken", token);
                     ui.getSession().setAttribute("userEmail", email.getValue());
-                    ui.navigate("sorteo"); // ← Ir a la vista de sorteo
+                    ui.navigate("bike-form"); // ← Ir a la vista de BIKE FORM
                 });
             }
         } catch (Exception ex) {

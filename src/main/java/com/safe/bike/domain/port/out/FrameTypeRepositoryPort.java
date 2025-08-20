@@ -4,9 +4,15 @@ import com.safe.bike.domain.model.entity.FrameTypeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 // No necesitas una clase de implementación. Spring la crea por ti.
 @Repository
-public interface FrameTypeRepositoryPort extends JpaRepository<FrameTypeEntity, Integer> {
-    // Aquí puedes agregar métodos de consulta personalizados si los necesitas.
-    // Por ejemplo: List<FrameTypeEntity> findByName(String name);
+public interface FrameTypeRepositoryPort{
+    FrameTypeEntity save(FrameTypeEntity frameType);
+
+    List<FrameTypeEntity> findAll();
+
+    Optional<FrameTypeEntity> findById(Integer id);
 }

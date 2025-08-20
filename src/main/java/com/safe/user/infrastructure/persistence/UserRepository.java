@@ -1,7 +1,7 @@
 package com.safe.user.infrastructure.persistence;
 
 
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;

@@ -1,8 +1,6 @@
 package com.safe.bike.config;
 
-import com.safe.bike.infrastructure.persistence.BikeRepository;
-import com.safe.bike.domain.port.out.BikeRepositoryPort;
-import org.springframework.context.annotation.Bean;
+import com.safe.bike.infrastructure.persistence.bike.BikeRepository;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration

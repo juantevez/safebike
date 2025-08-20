@@ -1,7 +1,7 @@
 package com.safe.bike.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
