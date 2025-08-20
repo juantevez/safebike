@@ -92,7 +92,11 @@ public class BikeFormView extends VerticalLayout {
         // Cargar los tipos de bicicleta
         List<BikeTypeEntity> bikeTypes = bikeTypeService.getAllBikeTypes();
         bikeTypeComboBox.setItems(bikeTypes);
-        bikeTypeComboBox.setItemLabelGenerator(BikeTypeEntity::getType);
+        //bikeTypeComboBox.setItemLabelGenerator(BikeTypeEntity::getType);
+        bikeTypeComboBox.setItemLabelGenerator(bikeType -> {
+            String type = bikeType.getType();
+            return type != null ? type : "Sin tipo";
+        });
 
         // Cargar los tipos de cuadro
         List<FrameTypeEntity> frameTypes = frameTypeService.getAllFrameTypes();
