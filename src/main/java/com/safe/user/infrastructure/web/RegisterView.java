@@ -17,6 +17,7 @@ public class RegisterView extends VerticalLayout {
     private final UserService userService;
 
     private TextField email = new TextField("Email");
+    private TextField userName = new TextField("Username");
     private TextField firstName = new TextField("Nombre");
     private TextField lastName = new TextField("Apellido");
     private TextField password = new TextField("Contraseña");
@@ -39,6 +40,7 @@ public class RegisterView extends VerticalLayout {
         add(
                 new H2("📝 Registro"),
                 email,
+                userName,
                 firstName,
                 lastName,
                 password,
@@ -48,18 +50,19 @@ public class RegisterView extends VerticalLayout {
 
     private void registrar() {
         String emailValue = email.getValue().trim();
+        String userNameValue = userName.getValue().trim();
         String firstNameValue = firstName.getValue().trim();
         String lastNameValue = lastName.getValue().trim();
         String passwordValue = password.getValue();
 
         // Validaciones simples
-        if (emailValue.isEmpty() || firstNameValue.isEmpty() || lastNameValue.isEmpty() ||passwordValue.isEmpty()) {
+        if (emailValue.isEmpty() || firstNameValue.isEmpty() || lastNameValue.isEmpty() ||passwordValue.isEmpty() || userNameValue.isEmpty()) {
             Notification.show("❌ Todos los campos son obligatorios.");
             return;
         }
 
         try {
-            userService.registrarUsuario(emailValue, passwordValue, firstNameValue, lastNameValue);
+            userService.registrarUsuario(emailValue, passwordValue, firstNameValue, lastNameValue, userNameValue);
 
             Notification notification = Notification.show(
                     "✅ El usuario \"" + firstNameValue + " " + lastNameValue + "\" se registró exitosamente"

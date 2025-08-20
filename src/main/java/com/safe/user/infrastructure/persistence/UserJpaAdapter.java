@@ -1,18 +1,15 @@
 package com.safe.user.infrastructure.persistence;
 
 
-
-import com.safe.user.adapter.UserRepository;
 import com.safe.user.domain.model.User;
 import com.safe.user.domain.port.UserRepositoryPort;
-import org.springframework.stereotype.Repository;
-
+import org.springframework.stereotype.Component;
 import java.util.Optional;
 
-@Repository
+@Component // o @Repository, si es más específico
 public class UserJpaAdapter implements UserRepositoryPort {
 
-    private final UserRepository userRepository;
+    private final UserRepository userRepository; // ¡Inyección aquí!
 
     public UserJpaAdapter(UserRepository userRepository) {
         this.userRepository = userRepository;

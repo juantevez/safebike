@@ -18,13 +18,13 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserDTO registrarUsuario(String email, String password, String firstName, String lastName) {
+    public UserDTO registrarUsuario(String email, String password, String firstName, String lastName, String userName) {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("El correo ya está registrado.");
         }
 
         String hashedPassword = passwordEncoder.encode(password);
-        User user = new User(email, hashedPassword, firstName, lastName);
+        User user = new User(email, hashedPassword, firstName, lastName, userName);
         user.setRole("USER"); // Asignar rol por defecto
 
         User saved = userRepository.save(user);

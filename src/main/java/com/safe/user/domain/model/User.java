@@ -1,6 +1,6 @@
 package com.safe.user.domain.model;
 
-import com.safe.bike.domain.model.BikeEntity;
+import com.safe.bike.domain.model.entity.BikeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 
@@ -44,11 +44,12 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    public User(String email, String password, String firstName, String lastName) {
+    public User(String email, String password, String firstName, String lastName, String username) {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.username = username;
         this.createdAt = LocalDateTime.now();
     }
 

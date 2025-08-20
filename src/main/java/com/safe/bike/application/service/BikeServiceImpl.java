@@ -1,35 +1,29 @@
 package com.safe.bike.application.service;
 
-import com.safe.bike.domain.model.BikeEntity;
+import com.safe.bike.domain.model.entity.BikeEntity;
 import com.safe.bike.domain.port.in.BikeServicePort;
-import com.safe.bike.domain.port.out.BikeRepositoryPort;
-import com.safe.bike.domain.port.out.BrandRepositoryPort;
+import com.safe.bike.infrastructure.persistence.BikeRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 @Service
 public class BikeServiceImpl implements BikeServicePort {
 
-    private final BikeRepositoryPort bikeRepositoryPort;
+    // Inyecta directamente la interfaz de Spring Data JPA
+    private final BikeRepository bikeRepository;
 
-    private final BrandRepositoryPort brandRepositoryPort;
-
-    public BikeServiceImpl(BikeRepositoryPort bikeRepositoryPort, BrandRepositoryPort brandRepositoryPort) {
-        this.bikeRepositoryPort = bikeRepositoryPort;
-        this.brandRepositoryPort = brandRepositoryPort;
+    public BikeServiceImpl(BikeRepository bikeRepository) {
+        this.bikeRepository = bikeRepository;
     }
 
     @Override
     public void save(BikeEntity bike) {
         log.info("Guardando bicicleta con ID: {}", bike.getBikeId());
-
         try {
-            //bikeRepositoryPort.save(bike);
-            bikeRepositoryPort.save(bike);
+            bikeRepository.save(bike);
             log.info("Bicicleta guardada exitosamente: {}", bike.getBikeId());
         } catch (Exception e) {
             log.error("Error al guardar bicicleta con ID: {}", bike.getBikeId(), e);
@@ -37,14 +31,24 @@ public class BikeServiceImpl implements BikeServicePort {
         }
     }
 
-    @Cacheable(value = "bike", key = "#id")
+    @Override
     public Optional<BikeEntity> getBikeById(Long id) {
-        return bikeRepositoryPort.findById(id);
+        return bikeRepository.findById(id);
     }
 
+
+    @Override
+    public List<BikeEntity> getAllBikes() {
+        log.info("Obteniendo todas las bicicletas");
+        try {
+            return bikeRepository.findAll();
+        } catch (Exception e) {
+            log.error("Error al obtener todas las bicicletas", e);
+            throw e;
+        }
+    }
 
     public Optional<BikeEntity> getBikesByBrand(Integer brand) {
-        return bikeRepositoryPort.findByBrand(brand);
+        return bikeRepository.findByBrandId(brand);
     }
-
 }

@@ -1,6 +1,5 @@
 package com.safe.bike.config;
 
-import com.safe.bike.infrastructure.persistence.BikePersistenceAdapter;
 import com.safe.bike.infrastructure.persistence.BikeRepository;
 import com.safe.bike.domain.port.out.BikeRepositoryPort;
 import org.springframework.context.annotation.Bean;
@@ -15,8 +14,4 @@ public class DatabaseConfig {
         this.bikeRepository = bikeRepository;
     }
 
-    @Bean
-    public BikeRepositoryPort bikeRepositoryPort() {
-        return new BikePersistenceAdapter(bikeRepository);
-    }
 }
