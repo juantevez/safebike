@@ -1,6 +1,7 @@
 package com.safe.bike.application.service;
 
 import com.safe.bike.domain.model.entity.BikeEntity;
+import com.safe.bike.domain.model.entity.BrandEntity;
 import com.safe.bike.domain.port.in.BikeServicePort;
 import com.safe.bike.infrastructure.persistence.BikeRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class BikeServiceImpl implements BikeServicePort {
     }
 
     @Override
-    public Optional<BikeEntity> getBikeById(Long id) {
+    public Optional<BikeEntity> getBikeById(BrandEntity id) {
         return bikeRepository.findById(id);
     }
 
