@@ -1,6 +1,6 @@
 package com.safe.user.config;
 
-import com.safe.user.application.service.UserService;
+import com.safe.user.application.service.UserServiceImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,15 +13,16 @@ import java.util.List;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
-    public CustomUserDetailsService(UserService userService) {
+
+    public CustomUserDetailsService(UserServiceImpl userService) {
         this.userService = userService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        com.safe.user.domain.User user = userService.findByEmail(email);
+        com.safe.user.model.User user = userService.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("Usuario no encontrado: " + email);
         }
@@ -34,4 +35,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .authorities(authorities)
                 .build();
     }
+
 }

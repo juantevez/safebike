@@ -1,7 +1,8 @@
 package com.safe.bike.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.safe.user.domain.User;
+import com.safe.user.adapter.out.persistence.entity.UserEntity;
+import com.safe.user.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +17,10 @@ public class BikeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bikeId;
+
+    // Puedes tener un campo transitorio si necesitas el objeto User temporalmente
+    @Transient
+    private User userInMemory;  // ← Solo para uso en memoria, no se persiste
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id") // El nombre de la columna en la tabla `bike`
@@ -42,5 +47,5 @@ public class BikeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private UserEntity user;
 }

@@ -1,6 +1,6 @@
 package com.safe.user.infrastructure.web;
 
-import com.safe.user.application.service.UserService;
+import com.safe.user.application.service.UserServiceImpl;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
@@ -14,7 +14,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "register", layout = MainLayout.class)
 public class RegisterView extends VerticalLayout {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     private TextField email = new TextField("Email");
     private TextField userName = new TextField("Username");
@@ -23,7 +23,7 @@ public class RegisterView extends VerticalLayout {
     private TextField password = new TextField("Contraseña");
     private Button registerButton = new Button("Registrarse");
 
-    public RegisterView(UserService userService) {
+    public RegisterView(UserServiceImpl userService) {
         this.userService = userService;
 
         // Configurar campo de contraseña

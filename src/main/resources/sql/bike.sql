@@ -33,7 +33,7 @@ CREATE TABLE frame_type (
 
 -- Tabla principal de bicicletas (normalizada)
 CREATE TABLE bike (
-    bikes_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    bike_id VARCHAR(255) NOT NULL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     brand_id INTEGER NOT NULL,
     serial_number VARCHAR(255),
