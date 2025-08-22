@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Route("bike-form")
@@ -90,7 +91,12 @@ public class BikeFormView extends VerticalLayout {
         binder.forField(serialNumberField).bind(BikeEntity::getSerialNumber, BikeEntity::setSerialNumber);
         binder.forField(bikeTypeComboBox).bind(BikeEntity::getBikeType, BikeEntity::setBikeType);
         binder.forField(frameTypeComboBox).bind(BikeEntity::getFrameType, BikeEntity::setFrameType);
-        binder.forField(purchaseDateField).bind(BikeEntity::getPurchaseDate, BikeEntity::setPurchaseDate);
+        binder.forField(purchaseDateField)
+                .withValidator(purchaseDate -> {
+                    if (purchaseDate == null) return true; // Permitir fecha vacía si no es obligatoria
+                    return !purchaseDate.isAfter(LocalDate.now());
+                }, "La fecha de compra debe ser igual o anterior a la fecha actual")
+                .bind(BikeEntity::getPurchaseDate, BikeEntity::setPurchaseDate);
         binder.forField(purchaseValueField).bind(BikeEntity::getPurchaseValue, BikeEntity::setPurchaseValue);
 
         // Configurar el botón de guardar

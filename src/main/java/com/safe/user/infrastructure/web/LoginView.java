@@ -7,6 +7,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.Autocapitalize;
 import com.vaadin.flow.component.textfield.Autocomplete;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
@@ -16,7 +17,8 @@ public class LoginView extends VerticalLayout {
     private final AuthService authService;
 
     private TextField email = new TextField("Email");
-    private TextField password = new TextField("Contraseña");
+    private PasswordField password = new PasswordField("Contraseña");
+
     private Button loginButton = new Button("Iniciar Sesión");
 
     public LoginView(AuthService authService) {
@@ -25,6 +27,7 @@ public class LoginView extends VerticalLayout {
         password.setAutocomplete(Autocomplete.NEW_PASSWORD);
         password.setAutocorrect(false);
         password.setAutocapitalize(Autocapitalize.NONE);
+
 
         loginButton.addClickListener(e -> login());
 
