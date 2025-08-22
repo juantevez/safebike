@@ -1,7 +1,6 @@
 package com.safe.user.model;
 
 
-import jdk.jshell.Snippet;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
@@ -18,7 +17,7 @@ public class User {
     private String password;
     private String firstName;
     private String lastName;
-
+    @Builder.Default
     private String role = "USER"; // valor por defecto
     private LocalDateTime createdAt;
 

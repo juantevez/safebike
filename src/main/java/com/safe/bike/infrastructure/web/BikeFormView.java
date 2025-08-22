@@ -4,30 +4,31 @@ import com.safe.bike.domain.model.entity.BikeEntity;
 import com.safe.bike.domain.model.entity.BikeTypeEntity;
 import com.safe.bike.domain.model.entity.BrandEntity;
 import com.safe.bike.domain.model.entity.FrameTypeEntity;
-
 import com.safe.bike.domain.port.in.BikeServicePort;
 import com.safe.bike.domain.port.in.BikeTypeServicePort;
 import com.safe.bike.domain.port.in.BrandServicePort;
 import com.safe.bike.domain.port.in.FrameTypeServicePort;
-
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
-import com.safe.user.infrastructure.mapper.UserMapper;
-import com.safe.user.model.User;
+import com.safe.user.config.JwtUtil;
 import com.safe.user.infrastructure.port.UserServicePort;
+import com.safe.user.model.User;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -40,11 +41,9 @@ public class BikeFormView extends VerticalLayout {
     private final BikeTypeServicePort bikeTypeService;
     private final FrameTypeServicePort frameTypeService;
     private final UserServicePort userService;
+    private JwtUtil jwtUtil;
 
-    private final UserMapper userMapper;
-
-    // Campos del formulario
-    private ComboBox<User> userComboBox = new ComboBox<>("Usuario");
+    // ✅ REMOVIDO: userComboBox ya no está en el formulario
     private ComboBox<BrandEntity> brandComboBox = new ComboBox<>("Marca");
     private TextField serialNumberField = new TextField("Número de Serie");
     private ComboBox<BikeTypeEntity> bikeTypeComboBox = new ComboBox<>("Tipo de Bicicleta");
@@ -58,14 +57,18 @@ public class BikeFormView extends VerticalLayout {
     // Binder para enlazar los campos a la entidad
     private Binder<BikeEntity> binder = new Binder<>(BikeEntity.class);
 
+    // ✅ NUEVO: Variable para almacenar el usuario logueado
+    private User currentUser;
+    private UserEntity currentUserEntity;
+
     @Autowired
     public BikeFormView(
             BikeServicePort bikeService,
             BrandServicePort brandService,
             BikeTypeServicePort bikeTypeService,
             FrameTypeServicePort frameTypeService,
-            UserServicePort userService, UserMapper userMapper) {
-        this.userMapper = userMapper;
+            UserServicePort userService,
+            JwtUtil jwtUtil) {
 
         logger.info("Inicializando BikeFormView");
 
@@ -74,12 +77,15 @@ public class BikeFormView extends VerticalLayout {
         this.bikeTypeService = bikeTypeService;
         this.frameTypeService = frameTypeService;
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
+
+        // ✅ NUEVO: Obtener el usuario logueado
+        getCurrentUser();
 
         // Configurar los ComboBox con los datos de la base de datos
         configureComboBoxes();
 
-        // Configurar el Binder
-        binder.forField(userComboBox).bind(BikeEntity::getUserInMemory, BikeEntity::setUserInMemory);
+        // ✅ ACTUALIZADO: Configurar el Binder sin userComboBox
         binder.forField(brandComboBox).bind(BikeEntity::getBrand, BikeEntity::setBrand);
         binder.forField(serialNumberField).bind(BikeEntity::getSerialNumber, BikeEntity::setSerialNumber);
         binder.forField(bikeTypeComboBox).bind(BikeEntity::getBikeType, BikeEntity::setBikeType);
@@ -90,9 +96,9 @@ public class BikeFormView extends VerticalLayout {
         // Configurar el botón de guardar
         saveButton.addClickListener(event -> saveBike());
 
-        // Layout del formulario
+        // ✅ ACTUALIZADO: Layout del formulario sin userComboBox
         FormLayout formLayout = new FormLayout();
-        formLayout.add(userComboBox, brandComboBox, serialNumberField, bikeTypeComboBox, frameTypeComboBox,
+        formLayout.add(brandComboBox, serialNumberField, bikeTypeComboBox, frameTypeComboBox,
                 purchaseDateField, purchaseValueField, saveButton);
 
         add(formLayout);
@@ -101,23 +107,89 @@ public class BikeFormView extends VerticalLayout {
         logger.info("BikeFormView inicializado correctamente");
     }
 
+    // ✅ NUEVO: Método para obtener el usuario logueado usando JWT
+    private void getCurrentUser() {
+        logger.info("=== DEBUGGING getCurrentUser() ===");
+
+        try {
+            // Opción 1: Obtener desde el token JWT en la sesión
+            String authToken = (String) VaadinSession.getCurrent().getAttribute("authToken");
+            String userEmail = (String) VaadinSession.getCurrent().getAttribute("userEmail");
+
+            logger.info("Token en sesión: {}", authToken != null ? "presente" : "ausente");
+            logger.info("Email en sesión: {}", userEmail);
+
+            if (authToken != null && userEmail != null) {
+                // Validar que el token sigue siendo válido
+                if (jwtUtil.isTokenValid(authToken, userEmail)) {
+                    logger.info("Token JWT válido para email: {}", userEmail);
+
+                    // Buscar el usuario en la base de datos
+                    this.currentUser = userService.findByEmail(userEmail);
+                    if (this.currentUser != null) {
+                        logger.info("Usuario encontrado: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
+                        this.currentUserEntity = convertUserToUserEntity(this.currentUser);
+                        return; // Usuario encontrado exitosamente
+                    } else {
+                        logger.warn("Usuario no encontrado en la base de datos con email: {}", userEmail);
+                    }
+                } else {
+                    logger.warn("Token JWT inválido o expirado para email: {}", userEmail);
+                    // Limpiar sesión con token inválido
+                    VaadinSession.getCurrent().setAttribute("authToken", null);
+                    VaadinSession.getCurrent().setAttribute("userEmail", null);
+                }
+            } else {
+                logger.warn("No hay token JWT o email en la sesión");
+            }
+
+            // Opción 2: Fallback - obtener desde Spring Security (poco probable con JWT)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && !"anonymousUser".equals(authentication.getName())) {
+                logger.info("Intentando obtener usuario desde Spring Security Context");
+                String springUserEmail = authentication.getName();
+                this.currentUser = userService.findByEmail(springUserEmail);
+                if (this.currentUser != null) {
+                    this.currentUserEntity = convertUserToUserEntity(this.currentUser);
+                    return;
+                }
+            }
+
+            // Si no se pudo obtener el usuario, redirigir al login
+            if (this.currentUser == null) {
+                logger.error("No se pudo obtener el usuario logueado");
+                Notification.show("Sesión expirada o inválida. Debe iniciar sesión nuevamente.",
+                        5000, Notification.Position.MIDDLE);
+                UI.getCurrent().navigate("login");
+            }
+
+        } catch (Exception e) {
+            logger.error("Error al obtener usuario logueado", e);
+            Notification.show("Error al obtener usuario: " + e.getMessage(),
+                    5000, Notification.Position.MIDDLE);
+            UI.getCurrent().navigate("login");
+        }
+    }
+
+    // ✅ NUEVO: Método para convertir User (dominio) a UserEntity (JPA)
+    private UserEntity convertUserToUserEntity(User user) {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(user.getId());
+        userEntity.setEmail(user.getEmail());
+        userEntity.setUsername(user.getUsername());
+        userEntity.setFirstName(user.getFirstName());
+        userEntity.setLastName(user.getLastName());
+        userEntity.setPassword(user.getPassword());
+        userEntity.setRole(user.getRole());
+        userEntity.setCreatedAt(user.getCreatedAt());
+        return userEntity;
+    }
+
     private void configureComboBoxes() {
         logger.info("Configurando ComboBoxes del formulario");
 
         try {
-            // Cargar usuarios
-            logger.info("Cargando usuarios para ComboBox");
-            List<User> users = userMapper.toDomainList(userService.getAllUsers());
-            userComboBox.setItems(users);
-            userComboBox.setItemLabelGenerator(user -> {
-                // Ajusta según los campos de tu entidad User
-                String name = user.getFirstName(); // o user.getUsername(), user.getEmail(), etc.
-                if (name == null || name.trim().isEmpty()) {
-                    return "Usuario ID: " + user.getId();
-                }
-                return name;
-            });
-            logger.info("ComboBox de usuarios configurado con {} elementos", users.size());
+            // ✅ REMOVIDO: Código para cargar usuarios ya no es necesario
 
             // Cargar las marcas desde el servicio
             logger.info("Cargando marcas para ComboBox");
@@ -138,7 +210,7 @@ public class BikeFormView extends VerticalLayout {
             List<BikeTypeEntity> bikeTypes = bikeTypeService.getAllBikeTypes();
             bikeTypeComboBox.setItems(bikeTypes);
             bikeTypeComboBox.setItemLabelGenerator(bikeType -> {
-                String type = bikeType.getType();
+                String type = bikeType.getName();
                 if (type == null || type.trim().isEmpty()) {
                     logger.warn("Tipo de bicicleta encontrado con type null o vacío: {}", bikeType);
                     return "Sin tipo";
@@ -152,7 +224,7 @@ public class BikeFormView extends VerticalLayout {
             List<FrameTypeEntity> frameTypes = frameTypeService.getAllFrameTypes();
             frameTypeComboBox.setItems(frameTypes);
             frameTypeComboBox.setItemLabelGenerator(frameType -> {
-                String type = frameType.getType();
+                String type = frameType.getName();
                 if (type == null || type.trim().isEmpty()) {
                     logger.warn("Tipo de cuadro encontrado con type null o vacío: {}", frameType);
                     return "Sin tipo";
@@ -171,14 +243,25 @@ public class BikeFormView extends VerticalLayout {
     private void saveBike() {
         logger.info("Intentando guardar bicicleta");
 
+        // ✅ VALIDACIÓN: Verificar que tenemos un usuario logueado
+        if (currentUser == null || currentUserEntity == null) {
+            logger.error("No se puede guardar la bicicleta: usuario no identificado");
+            Notification.show("Error: Usuario no identificado. Por favor, inicie sesión nuevamente.",
+                    5000, Notification.Position.MIDDLE);
+            return;
+        }
+
         BikeEntity bike = new BikeEntity();
         if (binder.writeBeanIfValid(bike)) {
             try {
+                // ✅ CORREGIDO: Asignar el UserEntity (no User) a la bicicleta
+                bike.setUser(currentUserEntity);
+
                 logger.debug("Datos de la bicicleta a guardar: {}", bike);
-                logger.info("Usuario asignado: ID={}", bike.getUser() != null ? bike.getUser().getId() : "null");
+                logger.info("Usuario asignado: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
 
                 bikeService.save(bike);
-                logger.info("Bicicleta guardada exitosamente con ID: {}", bike.getBikeType());
+                logger.info("Bicicleta guardada exitosamente");
 
                 Notification.show("Bicicleta guardada exitosamente!", 3000, Notification.Position.MIDDLE);
                 binder.readBean(null); // Limpiar el formulario

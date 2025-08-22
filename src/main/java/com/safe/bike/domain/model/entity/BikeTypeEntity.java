@@ -11,6 +11,6 @@ public class BikeTypeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer bikeTypeId;
 
-    @Column(name = "type", nullable = false) // Asegúrate de que este campo no sea nulo
-    private String type;
+    @Column(name = "name", nullable = false) // Asegúrate de que este campo no sea nulo
+    private String name;
 }

@@ -5,6 +5,7 @@ import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import com.safe.user.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -43,6 +44,7 @@ public class BikeEntity {
     private double purchaseValue;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @CreationTimestamp // Hibernate genera automáticamente al crear
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

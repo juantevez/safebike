@@ -23,13 +23,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/login", "/register", "/VAADIN/**", "/frontend/**", "/images/**", "/manifest.json", "/sw.js")
                         .permitAll()
-                        .requestMatchers("/sorteo/realizar") // Endpoint del sorteo
-                        .hasRole("ADMIN") // Solo admin
+                        .requestMatchers("/bike-form/**").authenticated()
                         .anyRequest()
                         .authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // ✅ CAMBIAR ESTO
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                        .defaultSuccessUrl("/bike-form", true) // Opcional: redirigir después del login
                 );
 
         return http.build();
@@ -45,7 +51,4 @@ public class SecurityConfig {
             AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
-    // ✅ Spring automáticamente usa CustomUserDetailsService
-    // No necesitas registrar explícitamente el UserDetailsService
 }

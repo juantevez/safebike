@@ -1,6 +1,5 @@
 package com.safe.user.adapter.out.persistence;
 
-
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import com.safe.user.adapter.out.persistence.repository.UserJpaRepository;
 import com.safe.user.adapter.out.persistence.mapper.UserPersistenceMapper;
@@ -80,26 +79,27 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
         if (email == null || email.trim().isEmpty()) {
             logger.warn("Se intentó buscar un usuario con email null o vacío en la base de datos");
+            return null;
         }
 
         try {
-            UserEntity entityOpt = userJpaRepository.findByEmailIgnoreCase(email.toLowerCase());
-            User userOpt =  userMapper.toDomain(entityOpt);  //.map(userMapper::toDomain);
+            // ✅ CORREGIDO: userJpaRepository retorna UserEntity, no Optional<UserEntity>
+            UserEntity userEntity = userJpaRepository.findByEmailIgnoreCase(email);
 
-            if (userOpt.getEmail().isEmpty()) {
+            if (userEntity != null) {
+                User user = userMapper.toDomain(userEntity);
                 logger.info("Usuario encontrado en la base de datos con email: {}", email);
-                logger.debug("Detalles del usuario desde BD: {}", userOpt.getId());
+                logger.debug("Detalles del usuario desde BD: {}", user);
+                return user;
             } else {
                 logger.warn("No se encontró usuario en la base de datos con email: {}", email);
+                return null;
             }
-
-            return userOpt;
         } catch (Exception e) {
             logger.error("Error al buscar usuario por email en la base de datos: {}", email, e);
             throw e;
         }
     }
-
 
     @Override
     public User save(User user) {
@@ -165,6 +165,4 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
             throw e;
         }
     }
-
-
 }

@@ -1,12 +1,12 @@
 package com.safe.user.application.service;
 
-
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import com.safe.user.domain.ports.UserRepositoryPort;
 import com.safe.user.model.User;
 import com.safe.user.infrastructure.port.UserServicePort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +17,12 @@ public class UserServiceImpl implements UserServicePort {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepositoryPort userRepositoryPort;
+    private final PasswordEncoder passwordEncoder;
 
     // Constructor con inyección de dependencias - Solo UserRepositoryPort es necesario
-    public UserServiceImpl(UserRepositoryPort userRepositoryPort) {
+    public UserServiceImpl(UserRepositoryPort userRepositoryPort, PasswordEncoder passwordEncoder) {
         this.userRepositoryPort = userRepositoryPort;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -91,20 +93,20 @@ public class UserServiceImpl implements UserServicePort {
 
         if (email == null || email.trim().isEmpty()) {
             logger.warn("Se intentó buscar un usuario con email null o vacío");
-            return new User();
+            return null;
         }
 
         try {
             User user = userRepositoryPort.findByEmail(email.toLowerCase());
 
-            if (user.getEmail().isEmpty()) {
+            if (user != null) {
                 logger.info("Usuario encontrado con email: {}", email);
-                logger.debug("Detalles del usuario: {}", user.getId());
+                logger.debug("Detalles del usuario: {}", user);
             } else {
                 logger.warn("No se encontró usuario con email: {}", email);
             }
 
-            return new User();
+            return user; // ✅ CORREGIDO: Retornar el usuario encontrado o null
         } catch (Exception e) {
             logger.error("Error al buscar usuario por email: {}", email, e);
             throw e;
@@ -164,18 +166,18 @@ public class UserServiceImpl implements UserServicePort {
         try {
             // Verificar si el usuario ya existe
             User existingUser = userRepositoryPort.findByEmail(email.toLowerCase());
-            if (existingUser.getEmail().isEmpty()) {
+            if (existingUser != null) {  // ✅ CORREGIDO: Verificar null correctamente
                 logger.warn("Intento de registro con email ya existente: {}", email);
                 throw new IllegalArgumentException("Ya existe un usuario con el email: " + email);
             }
-
+            String hashedPassword = passwordEncoder.encode(password);
             // Crear nuevo usuario
             User newUser = new User();
             newUser.setEmail(email.trim().toLowerCase());
             newUser.setFirstName(firstName.trim());
             newUser.setLastName(lastName.trim());
             newUser.setUsername(userName != null ? userName.trim() : email.trim());
-            newUser.setPassword(password); // En producción: hashear la contraseña
+            newUser.setPassword(hashedPassword); // En producción: hashear la contraseña
 
             logger.debug("Datos del nuevo usuario a registrar: email={}, firstName={}, lastName={}, username={}",
                     newUser.getEmail(), newUser.getFirstName(), newUser.getLastName(), newUser.getUsername());
