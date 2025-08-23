@@ -1,4 +1,4 @@
-package com.safe.bike.application.service;
+package com.safe.bike.service;
 
 import com.safe.bike.domain.model.entity.BrandEntity;
 import com.safe.bike.domain.port.in.BrandServicePort;

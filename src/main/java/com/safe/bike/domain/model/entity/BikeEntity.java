@@ -27,16 +27,11 @@ public class BikeEntity {
     @JoinColumn(name = "brand_id") // El nombre de la columna en la tabla `bike`
     private BrandEntity brand; // <--- Relación con Brand
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "model_bike_id")
+    private BikeModelEntity bikeModel;
     @Column(name = "serial_number", nullable = false)
     private String serialNumber;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bike_type_id")
-    private BikeTypeEntity bikeType; // <--- Relación con BikeTypeEntity
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "frame_type_id")
-    private FrameTypeEntity frameType; // <--- Relación con FrameTypeEntity
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate purchaseDate;

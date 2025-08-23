@@ -23,7 +23,7 @@ public class BrandPersistenceAdapter implements BrandRepositoryPort {
 
     @Override
     public List<BrandEntity> findAll() {
-        return brandJpaRepository.findAll();
+        return brandJpaRepository.findAllOrderedByName();
     }
 
     @Override

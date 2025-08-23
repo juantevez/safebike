@@ -4,22 +4,18 @@ import com.safe.bike.domain.model.entity.BikeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BikeRepository extends JpaRepository<BikeEntity, Long> {
-    // Este método ya lo heredas de JpaRepository, no lo declares.
-    // Optional<BikeEntity> findById(Long id);
 
-    // Este método es personalizado para encontrar por el ID de la marca.
-    // Usamos la convención de Spring Data JPA.
+    List<BikeEntity> findByUser_Id(Long userId);
     Optional<BikeEntity> findByBrand_BrandId(Integer brandId);
 
-    // Este método es personalizado para encontrar por el tipo de bicicleta.
-    // Opcionalmente, si lo necesitas.
-    Optional<BikeEntity> findByBikeType_BikeTypeId(Integer bikeTypeId);
+    // ✅ NUEVOS - para buscar por modelo
+    List<BikeEntity> findByBikeModel_IdBikeModel(Integer modelId);
+    List<BikeEntity> findByBikeModel_ModelNameContainingIgnoreCase(String modelName);
 
-    // Si necesitas un método para encontrar todas las bicicletas,
-    // también lo heredas de JpaRepository.
-    // List<BikeEntity> findAll();
+    Optional<BikeEntity> findBySerialNumber(String serialNumber);
 }

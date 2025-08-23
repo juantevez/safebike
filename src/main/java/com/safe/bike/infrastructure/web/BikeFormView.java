@@ -1,13 +1,7 @@
 package com.safe.bike.infrastructure.web;
 
-import com.safe.bike.domain.model.entity.BikeEntity;
-import com.safe.bike.domain.model.entity.BikeTypeEntity;
-import com.safe.bike.domain.model.entity.BrandEntity;
-import com.safe.bike.domain.model.entity.FrameTypeEntity;
-import com.safe.bike.domain.port.in.BikeServicePort;
-import com.safe.bike.domain.port.in.BikeTypeServicePort;
-import com.safe.bike.domain.port.in.BrandServicePort;
-import com.safe.bike.domain.port.in.FrameTypeServicePort;
+import com.safe.bike.domain.model.entity.*;
+import com.safe.bike.domain.port.in.*;
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import com.safe.user.config.JwtUtil;
 import com.safe.user.infrastructure.port.UserServicePort;
@@ -39,16 +33,14 @@ public class BikeFormView extends VerticalLayout {
 
     private final BikeServicePort bikeService;
     private final BrandServicePort brandService;
-    private final BikeTypeServicePort bikeTypeService;
-    private final FrameTypeServicePort frameTypeService;
     private final UserServicePort userService;
+    private final BikeModelServicePort bikeModelServicePort;
     private JwtUtil jwtUtil;
 
     // ✅ REMOVIDO: userComboBox ya no está en el formulario
     private ComboBox<BrandEntity> brandComboBox = new ComboBox<>("Marca");
+    private ComboBox<BikeModelEntity> modelComboBox = new ComboBox<>("Modelo");
     private TextField serialNumberField = new TextField("Número de Serie");
-    private ComboBox<BikeTypeEntity> bikeTypeComboBox = new ComboBox<>("Tipo de Bicicleta");
-    private ComboBox<FrameTypeEntity> frameTypeComboBox = new ComboBox<>("Tipo de Cuadro");
     private DatePicker purchaseDateField = new DatePicker("Fecha de Compra");
     private NumberField purchaseValueField = new NumberField("Valor de Compra");
 
@@ -66,17 +58,14 @@ public class BikeFormView extends VerticalLayout {
     public BikeFormView(
             BikeServicePort bikeService,
             BrandServicePort brandService,
-            BikeTypeServicePort bikeTypeService,
-            FrameTypeServicePort frameTypeService,
             UserServicePort userService,
-            JwtUtil jwtUtil) {
+            BikeModelServicePort bikeModelServicePort, JwtUtil jwtUtil) {
 
         logger.info("Inicializando BikeFormView");
 
         this.bikeService = bikeService;
         this.brandService = brandService;
-        this.bikeTypeService = bikeTypeService;
-        this.frameTypeService = frameTypeService;
+        this.bikeModelServicePort = bikeModelServicePort;
         this.userService = userService;
         this.jwtUtil = jwtUtil;
 
@@ -89,8 +78,7 @@ public class BikeFormView extends VerticalLayout {
         // ✅ ACTUALIZADO: Configurar el Binder sin userComboBox
         binder.forField(brandComboBox).bind(BikeEntity::getBrand, BikeEntity::setBrand);
         binder.forField(serialNumberField).bind(BikeEntity::getSerialNumber, BikeEntity::setSerialNumber);
-        binder.forField(bikeTypeComboBox).bind(BikeEntity::getBikeType, BikeEntity::setBikeType);
-        binder.forField(frameTypeComboBox).bind(BikeEntity::getFrameType, BikeEntity::setFrameType);
+        binder.forField(modelComboBox).bind(BikeEntity::getBikeModel, BikeEntity::setBikeModel);
         binder.forField(purchaseDateField)
                 .withValidator(purchaseDate -> {
                     if (purchaseDate == null) return true; // Permitir fecha vacía si no es obligatoria
@@ -104,7 +92,7 @@ public class BikeFormView extends VerticalLayout {
 
         // ✅ ACTUALIZADO: Layout del formulario sin userComboBox
         FormLayout formLayout = new FormLayout();
-        formLayout.add(brandComboBox, serialNumberField, bikeTypeComboBox, frameTypeComboBox,
+        formLayout.add(brandComboBox, modelComboBox, serialNumberField,
                 purchaseDateField, purchaseValueField, saveButton);
 
         add(formLayout);
@@ -211,33 +199,17 @@ public class BikeFormView extends VerticalLayout {
             });
             logger.info("ComboBox de marcas configurado con {} elementos", brands.size());
 
-            // Cargar los tipos de bicicleta
-            logger.info("Cargando tipos de bicicleta para ComboBox");
-            List<BikeTypeEntity> bikeTypes = bikeTypeService.getAllBikeTypes();
-            bikeTypeComboBox.setItems(bikeTypes);
-            bikeTypeComboBox.setItemLabelGenerator(bikeType -> {
-                String type = bikeType.getName();
-                if (type == null || type.trim().isEmpty()) {
-                    logger.warn("Tipo de bicicleta encontrado con type null o vacío: {}", bikeType);
-                    return "Sin tipo";
+            brandComboBox.addValueChangeListener(event -> {
+                if (event.getValue() != null) {
+                    List<BikeModelEntity> models = bikeModelServicePort.getBikeModelsByBrandId(event.getValue().getBrandId());
+                    modelComboBox.setItems(models);
+                    modelComboBox.setItemLabelGenerator(BikeModelEntity::getModelName);
+                    modelComboBox.setEnabled(true);
+                } else {
+                    modelComboBox.clear();
+                    modelComboBox.setEnabled(false);
                 }
-                return type;
             });
-            logger.info("ComboBox de tipos de bicicleta configurado con {} elementos", bikeTypes.size());
-
-            // Cargar los tipos de cuadro
-            logger.info("Cargando tipos de cuadro para ComboBox");
-            List<FrameTypeEntity> frameTypes = frameTypeService.getAllFrameTypes();
-            frameTypeComboBox.setItems(frameTypes);
-            frameTypeComboBox.setItemLabelGenerator(frameType -> {
-                String type = frameType.getName();
-                if (type == null || type.trim().isEmpty()) {
-                    logger.warn("Tipo de cuadro encontrado con type null o vacío: {}", frameType);
-                    return "Sin tipo";
-                }
-                return type;
-            });
-            logger.info("ComboBox de tipos de cuadro configurado con {} elementos", frameTypes.size());
 
         } catch (Exception e) {
             logger.error("Error al configurar ComboBoxes", e);
