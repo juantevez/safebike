@@ -10,6 +10,6 @@ import lombok.Data;
 @Data
 public class BrandEntity {
     @Id
-    private Integer brandId;
+    private Long brandId;
     private String name; // Ejemplo de campo
 }

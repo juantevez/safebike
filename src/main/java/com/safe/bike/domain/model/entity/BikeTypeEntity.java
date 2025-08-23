@@ -14,7 +14,7 @@ public class BikeTypeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "bike_type_id")
-    private Integer bikeTypeId;
+    private Long bikeTypeId;
 
     @Column(name = "name", nullable = false, length = 100, unique = true)
     private String name;

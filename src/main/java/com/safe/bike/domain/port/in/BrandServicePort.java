@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface BrandServicePort {
     List<BrandEntity> getAllBrands();
-    Optional<BrandEntity> getBrandById(Integer id);
+    Optional<BrandEntity> getBrandById(Long id);
 }

@@ -1,7 +1,14 @@
 package com.safe.bike.infrastructure.web;
 
-import com.safe.bike.domain.model.entity.*;
-import com.safe.bike.domain.port.in.*;
+import com.safe.bike.domain.model.dto.BikeModelDto;
+import com.safe.bike.domain.model.entity.BikeEntity;
+import com.safe.bike.domain.model.entity.BikeModelEntity;
+import com.safe.bike.domain.model.entity.BikeTypeEntity;
+import com.safe.bike.domain.model.entity.BrandEntity;
+import com.safe.bike.domain.port.in.BikeModelServicePort;
+import com.safe.bike.domain.port.in.BikeServicePort;
+import com.safe.bike.domain.port.in.BikeTypeServicePort;
+import com.safe.bike.domain.port.in.BrandServicePort;
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import com.safe.user.config.JwtUtil;
 import com.safe.user.infrastructure.port.UserServicePort;
@@ -26,121 +33,126 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Route("bike-form")
 public class BikeFormView extends VerticalLayout {
+
     private static final Logger logger = LoggerFactory.getLogger(BikeFormView.class);
 
     private final BikeServicePort bikeService;
     private final BrandServicePort brandService;
+    private final BikeTypeServicePort bikeTypeService;
     private final UserServicePort userService;
     private final BikeModelServicePort bikeModelServicePort;
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    // ✅ REMOVIDO: userComboBox ya no está en el formulario
     private ComboBox<BrandEntity> brandComboBox = new ComboBox<>("Marca");
-    private ComboBox<BikeModelEntity> modelComboBox = new ComboBox<>("Modelo");
+    private ComboBox<BikeTypeEntity> bikeTypeComboBox = new ComboBox<>("Tipo de Bicicleta");
+    private ComboBox<BikeModelDto> bikeModelComboBox = new ComboBox<>("Modelo"); // ✅ Cambiado a DTO
+
     private TextField serialNumberField = new TextField("Número de Serie");
     private DatePicker purchaseDateField = new DatePicker("Fecha de Compra");
     private NumberField purchaseValueField = new NumberField("Valor de Compra");
 
-    // Botón de guardado
     private Button saveButton = new Button("Guardar Bicicleta");
 
-    // Binder para enlazar los campos a la entidad
+    // Binder ahora usa BikeEntity, pero manejamos BikeModelDto en el modelo
     private Binder<BikeEntity> binder = new Binder<>(BikeEntity.class);
 
-    // ✅ NUEVO: Variable para almacenar el usuario logueado
     private User currentUser;
     private UserEntity currentUserEntity;
+
+    // Cache temporal para mapear DTO → Entity al guardar
+    private final java.util.Map<BikeModelDto, BikeModelEntity> dtoToEntityMap = new java.util.HashMap<>();
 
     @Autowired
     public BikeFormView(
             BikeServicePort bikeService,
             BrandServicePort brandService,
+            BikeTypeServicePort bikeTypeService,
             UserServicePort userService,
-            BikeModelServicePort bikeModelServicePort, JwtUtil jwtUtil) {
+            BikeModelServicePort bikeModelServicePort,
+            JwtUtil jwtUtil) {
 
         logger.info("Inicializando BikeFormView");
 
         this.bikeService = bikeService;
         this.brandService = brandService;
-        this.bikeModelServicePort = bikeModelServicePort;
+        this.bikeTypeService = bikeTypeService;
         this.userService = userService;
+        this.bikeModelServicePort = bikeModelServicePort;
         this.jwtUtil = jwtUtil;
 
-        // ✅ NUEVO: Obtener el usuario logueado
         getCurrentUser();
-
-        // Configurar los ComboBox con los datos de la base de datos
         configureComboBoxes();
-
-        // ✅ ACTUALIZADO: Configurar el Binder sin userComboBox
-        binder.forField(brandComboBox).bind(BikeEntity::getBrand, BikeEntity::setBrand);
-        binder.forField(serialNumberField).bind(BikeEntity::getSerialNumber, BikeEntity::setSerialNumber);
-        binder.forField(modelComboBox).bind(BikeEntity::getBikeModel, BikeEntity::setBikeModel);
-        binder.forField(purchaseDateField)
-                .withValidator(purchaseDate -> {
-                    if (purchaseDate == null) return true; // Permitir fecha vacía si no es obligatoria
-                    return !purchaseDate.isAfter(LocalDate.now());
-                }, "La fecha de compra debe ser igual o anterior a la fecha actual")
-                .bind(BikeEntity::getPurchaseDate, BikeEntity::setPurchaseDate);
-        binder.forField(purchaseValueField).bind(BikeEntity::getPurchaseValue, BikeEntity::setPurchaseValue);
-
-        // Configurar el botón de guardar
+        configureBinder();
         saveButton.addClickListener(event -> saveBike());
 
-        // ✅ ACTUALIZADO: Layout del formulario sin userComboBox
         FormLayout formLayout = new FormLayout();
-        formLayout.add(brandComboBox, modelComboBox, serialNumberField,
-                purchaseDateField, purchaseValueField, saveButton);
+        formLayout.add(
+                brandComboBox,
+                bikeTypeComboBox,
+                bikeModelComboBox,
+                serialNumberField,
+                purchaseDateField,
+                purchaseValueField
+        );
 
-        add(formLayout);
+        add(formLayout, saveButton);
         setAlignItems(Alignment.CENTER);
 
         logger.info("BikeFormView inicializado correctamente");
     }
 
-    // ✅ NUEVO: Método para obtener el usuario logueado usando JWT
+    private void configureBinder() {
+        binder.forField(brandComboBox)
+                .asRequired("La marca es obligatoria")
+                .bind(BikeEntity::getBrand, BikeEntity::setBrand);
+
+        binder.forField(bikeTypeComboBox)
+                .asRequired("El tipo de bicicleta es obligatorio")
+                .bind(BikeEntity::getBikeType, BikeEntity::setBikeType);
+
+        // No bindeamos directamente el DTO, lo manejamos manualmente
+        binder.forField(serialNumberField)
+                .asRequired("El número de serie es obligatorio")
+                .bind(BikeEntity::getSerialNumber, BikeEntity::setSerialNumber);
+
+        binder.forField(purchaseDateField)
+                .withValidator(purchaseDate -> {
+                    if (purchaseDate == null) return true;
+                    return !purchaseDate.isAfter(LocalDate.now());
+                }, "La fecha de compra debe ser igual o anterior a la fecha actual")
+                .bind(BikeEntity::getPurchaseDate, BikeEntity::setPurchaseDate);
+
+        binder.forField(purchaseValueField)
+                .bind(BikeEntity::getPurchaseValue, BikeEntity::setPurchaseValue);
+    }
+
     private void getCurrentUser() {
         logger.info("=== DEBUGGING getCurrentUser() ===");
 
         try {
-            // Opción 1: Obtener desde el token JWT en la sesión
             String authToken = (String) VaadinSession.getCurrent().getAttribute("authToken");
             String userEmail = (String) VaadinSession.getCurrent().getAttribute("userEmail");
 
             logger.info("Token en sesión: {}", authToken != null ? "presente" : "ausente");
             logger.info("Email en sesión: {}", userEmail);
 
-            if (authToken != null && userEmail != null) {
-                // Validar que el token sigue siendo válido
-                if (jwtUtil.isTokenValid(authToken, userEmail)) {
-                    logger.info("Token JWT válido para email: {}", userEmail);
-
-                    // Buscar el usuario en la base de datos
-                    this.currentUser = userService.findByEmail(userEmail);
-                    if (this.currentUser != null) {
-                        logger.info("Usuario encontrado: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
-                        this.currentUserEntity = convertUserToUserEntity(this.currentUser);
-                        return; // Usuario encontrado exitosamente
-                    } else {
-                        logger.warn("Usuario no encontrado en la base de datos con email: {}", userEmail);
-                    }
+            if (authToken != null && userEmail != null && jwtUtil.isTokenValid(authToken, userEmail)) {
+                this.currentUser = userService.findByEmail(userEmail);
+                if (this.currentUser != null) {
+                    logger.info("Usuario encontrado: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
+                    this.currentUserEntity = convertUserToUserEntity(this.currentUser);
+                    return;
                 } else {
-                    logger.warn("Token JWT inválido o expirado para email: {}", userEmail);
-                    // Limpiar sesión con token inválido
-                    VaadinSession.getCurrent().setAttribute("authToken", null);
-                    VaadinSession.getCurrent().setAttribute("userEmail", null);
+                    logger.warn("Usuario no encontrado en la base de datos con email: {}", userEmail);
                 }
-            } else {
-                logger.warn("No hay token JWT o email en la sesión");
             }
 
-            // Opción 2: Fallback - obtener desde Spring Security (poco probable con JWT)
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && !"anonymousUser".equals(authentication.getName())) {
-                logger.info("Intentando obtener usuario desde Spring Security Context");
                 String springUserEmail = authentication.getName();
                 this.currentUser = userService.findByEmail(springUserEmail);
                 if (this.currentUser != null) {
@@ -149,7 +161,6 @@ public class BikeFormView extends VerticalLayout {
                 }
             }
 
-            // Si no se pudo obtener el usuario, redirigir al login
             if (this.currentUser == null) {
                 logger.error("No se pudo obtener el usuario logueado");
                 Notification.show("Sesión expirada o inválida. Debe iniciar sesión nuevamente.",
@@ -165,7 +176,6 @@ public class BikeFormView extends VerticalLayout {
         }
     }
 
-    // ✅ NUEVO: Método para convertir User (dominio) a UserEntity (JPA)
     private UserEntity convertUserToUserEntity(User user) {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(user.getId());
@@ -183,74 +193,170 @@ public class BikeFormView extends VerticalLayout {
         logger.info("Configurando ComboBoxes del formulario");
 
         try {
-            // ✅ REMOVIDO: Código para cargar usuarios ya no es necesario
-
-            // Cargar las marcas desde el servicio
-            logger.info("Cargando marcas para ComboBox");
+            // Cargar marcas
             List<BrandEntity> brands = brandService.getAllBrands();
-            brandComboBox.setItems(brands);
-            brandComboBox.setItemLabelGenerator(brand -> {
-                String name = brand.getName();
-                if (name == null || name.trim().isEmpty()) {
-                    logger.warn("Marca encontrada con nombre null o vacío: {}", brand);
-                    return "Sin nombre";
-                }
-                return name;
-            });
-            logger.info("ComboBox de marcas configurado con {} elementos", brands.size());
+            if (brands != null && !brands.isEmpty()) {
+                brandComboBox.setItems(brands);
+                brandComboBox.setItemLabelGenerator(brand -> Objects.toString(brand.getName(), "Sin nombre"));
+                logger.info("Marcas cargadas: {}", brands.size());
+            } else {
+                logger.warn("No hay marcas disponibles");
+                Notification.show("No hay marcas disponibles", 3000, Notification.Position.MIDDLE);
+            }
 
-            brandComboBox.addValueChangeListener(event -> {
-                if (event.getValue() != null) {
-                    List<BikeModelEntity> models = bikeModelServicePort.getBikeModelsByBrandId(event.getValue().getBrandId());
-                    modelComboBox.setItems(models);
-                    modelComboBox.setItemLabelGenerator(BikeModelEntity::getModelName);
-                    modelComboBox.setEnabled(true);
-                } else {
-                    modelComboBox.clear();
-                    modelComboBox.setEnabled(false);
+            // Cargar tipos
+            List<BikeTypeEntity> bikeTypes = bikeTypeService.getAllBikeTypes();
+            if (bikeTypes != null && !bikeTypes.isEmpty()) {
+                bikeTypeComboBox.setItems(bikeTypes);
+                bikeTypeComboBox.setItemLabelGenerator(type -> Objects.toString(type.getName(), "Sin tipo"));
+                logger.info("Tipos de bicicleta cargados: {}", bikeTypes.size());
+            } else {
+                logger.warn("No hay tipos de bicicleta disponibles");
+                Notification.show("No hay tipos disponibles", 3000, Notification.Position.MIDDLE);
+            }
+
+            // Cargar entidades con detalles para mapeo interno
+            List<BikeModelEntity> allModelEntities = bikeModelServicePort.findAllWithDetails();
+            if (allModelEntities != null && !allModelEntities.isEmpty()) {
+                dtoToEntityMap.clear();
+
+                for (BikeModelEntity entity : allModelEntities) {
+                    BikeModelDto dto = new BikeModelDto(
+                            entity.getIdBikeModel(),  // Ya es Long
+                            entity.getModelName(),
+                            entity.getBrand().getBrandId(),
+                            entity.getBrand().getName(),
+                            entity.getBikeType().getBikeTypeId(),  // Ya es Long
+                            entity.getBikeType().getName()
+                    );
+                    dtoToEntityMap.put(dto, entity);
                 }
-            });
+
+                logger.info("Mapeo DTO → Entity creado para {} modelos", dtoToEntityMap.size());
+            }
+
+            configureDynamicModelFiltering();
 
         } catch (Exception e) {
             logger.error("Error al configurar ComboBoxes", e);
-            Notification.show("Error al cargar los datos del formulario: " + e.getMessage(),
+            Notification.show("Error al cargar datos: " + e.getMessage(),
                     5000, Notification.Position.MIDDLE);
+        }
+    }
+
+    private void configureDynamicModelFiltering() {
+        Runnable updateModels = () -> {
+            BrandEntity selectedBrand = brandComboBox.getValue();
+            BikeTypeEntity selectedType = bikeTypeComboBox.getValue();
+
+            bikeModelComboBox.clear();
+
+            if (selectedBrand != null && selectedType != null) {
+                logger.info("Filtrando modelos por marca: {} y tipo: {}", selectedBrand.getName(), selectedType.getName());
+
+                List<BikeModelDto> filtered = bikeModelServicePort.getModelsByBrandAndType(
+                        selectedBrand.getBrandId().longValue(),
+                        selectedType.getBikeTypeId().longValue()
+                );
+
+                if (filtered != null && !filtered.isEmpty()) {
+                    bikeModelComboBox.setItems(filtered);
+                    bikeModelComboBox.setItemLabelGenerator(BikeModelDto::modelName);
+                    bikeModelComboBox.setEnabled(true);
+                    bikeModelComboBox.setPlaceholder("Seleccione un modelo");
+                    logger.info("Modelos filtrados: {} encontrados", filtered.size());
+                } else {
+                    bikeModelComboBox.setEnabled(false);
+                    bikeModelComboBox.setPlaceholder("No hay modelos para esta combinación");
+                    logger.info("No hay modelos para la combinación seleccionada");
+                }
+            } else if (selectedBrand != null) {
+                logger.info("Filtrando solo por marca: {}", selectedBrand.getName());
+                List<BikeModelDto> filtered = bikeModelServicePort.getModelsByBrand(selectedBrand.getBrandId().longValue());
+                setModelsInComboBox(filtered, "No hay modelos para esta marca");
+            } else if (selectedType != null) {
+                logger.info("Filtrando solo por tipo: {}", selectedType.getName());
+                List<BikeModelDto> filtered = bikeModelServicePort.getModelsByType(selectedType.getBikeTypeId().longValue());
+                setModelsInComboBox(filtered, "No hay modelos para este tipo");
+            } else {
+                bikeModelComboBox.setEnabled(false);
+                bikeModelComboBox.setPlaceholder("Seleccione marca y tipo");
+            }
+        };
+
+        brandComboBox.addValueChangeListener(event -> updateModels.run());
+        bikeTypeComboBox.addValueChangeListener(event -> updateModels.run());
+
+        bikeModelComboBox.setEnabled(false);
+        bikeModelComboBox.setPlaceholder("Seleccione marca y tipo");
+    }
+
+    private void setModelsInComboBox(List<BikeModelDto> models, String placeholder) {
+        if (models != null && !models.isEmpty()) {
+            bikeModelComboBox.setItems(models);
+            bikeModelComboBox.setItemLabelGenerator(BikeModelDto::modelName);
+            bikeModelComboBox.setEnabled(true);
+            bikeModelComboBox.setPlaceholder("Seleccione un modelo");
+        } else {
+            bikeModelComboBox.setEnabled(false);
+            bikeModelComboBox.setPlaceholder(placeholder);
         }
     }
 
     private void saveBike() {
         logger.info("Intentando guardar bicicleta");
 
-        // ✅ VALIDACIÓN: Verificar que tenemos un usuario logueado
         if (currentUser == null || currentUserEntity == null) {
-            logger.error("No se puede guardar la bicicleta: usuario no identificado");
-            Notification.show("Error: Usuario no identificado. Por favor, inicie sesión nuevamente.",
-                    5000, Notification.Position.MIDDLE);
+            logger.error("Usuario no identificado");
+            Notification.show("Por favor, inicie sesión nuevamente.", 5000, Notification.Position.MIDDLE);
+            UI.getCurrent().navigate("login");
             return;
         }
 
         BikeEntity bike = new BikeEntity();
         if (binder.writeBeanIfValid(bike)) {
             try {
-                // ✅ CORREGIDO: Asignar el UserEntity (no User) a la bicicleta
+                // Asignar usuario
                 bike.setUser(currentUserEntity);
 
-                logger.debug("Datos de la bicicleta a guardar: {}", bike);
-                logger.info("Usuario asignado: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
+                // Mapear BikeModelDto → BikeModelEntity si fue seleccionado
+                BikeModelDto selectedDto = bikeModelComboBox.getValue();
+                if (selectedDto != null) {
+                    BikeModelEntity modelEntity = dtoToEntityMap.get(selectedDto);
+                    if (modelEntity != null) {
+                        bike.setBikeModel(modelEntity);
+                    } else {
+                        logger.warn("No se encontró BikeModelEntity para el DTO seleccionado: {}", selectedDto.modelName());
+                        Notification.show("Error: modelo no válido", 3000, Notification.Position.MIDDLE);
+                        return;
+                    }
+                }
+
+                logger.info("Guardando bicicleta: marca={}, tipo={}, modelo={}, serial={}",
+                        bike.getBrand().getName(),
+                        bike.getBikeType().getName(),
+                        bike.getBikeModel() != null ? bike.getBikeModel().getModelName() : "N/A",
+                        bike.getSerialNumber());
 
                 bikeService.save(bike);
-                logger.info("Bicicleta guardada exitosamente");
+                logger.info("Bicicleta guardada exitosamente: {}", bike.getBikeId());
 
-                Notification.show("Bicicleta guardada exitosamente!", 3000, Notification.Position.MIDDLE);
-                binder.readBean(null); // Limpiar el formulario
+                Notification.show("✅ Bicicleta guardada exitosamente!", 3000, Notification.Position.MIDDLE);
+
+                // Limpiar formulario
+                binder.readBean(new BikeEntity());
+                brandComboBox.clear();
+                bikeTypeComboBox.clear();
+                bikeModelComboBox.clear();
 
             } catch (Exception e) {
-                logger.error("Error al guardar bicicleta: {}", bike, e);
-                Notification.show("Error al guardar: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+                logger.error("Error al guardar bicicleta", e);
+                Notification.show("❌ Error al guardar: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
             }
         } else {
-            logger.warn("Formulario inválido - no se puede guardar la bicicleta");
-            Notification.show("Hay errores en el formulario. Por favor, corrígelos.", 3000, Notification.Position.MIDDLE);
+            logger.warn("Formulario inválido");
+            binder.validate();
+            Notification.show("Por favor complete los campos obligatorios", 3000, Notification.Position.MIDDLE);
         }
     }
 }

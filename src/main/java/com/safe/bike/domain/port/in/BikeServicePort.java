@@ -10,5 +10,5 @@ public interface BikeServicePort {
     void save(BikeEntity bike);
     Optional<BikeEntity> getBikeById(Long id);
     List<BikeEntity> getAllBikes();
-    Optional<BikeEntity> getBikesByBrand(Integer brand); // Agregar este método
+    Optional<BikeEntity> getBikesByBrand(Long brand); // Agregar este método
 }

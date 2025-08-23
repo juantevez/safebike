@@ -27,7 +27,7 @@ public class BrandPersistenceAdapter implements BrandRepositoryPort {
     }
 
     @Override
-    public Optional<BrandEntity> findById(Integer id) {
+    public Optional<BrandEntity> findById(Long id) {
         return brandJpaRepository.findById(id);
     }
 

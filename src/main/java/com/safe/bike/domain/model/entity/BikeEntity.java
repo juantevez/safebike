@@ -28,6 +28,9 @@ public class BikeEntity {
     private BrandEntity brand; // <--- Relación con Brand
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bike_type_id")
+    private BikeTypeEntity bikeType; // <--- Relación con BikeTypeEntity
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "model_bike_id")
     private BikeModelEntity bikeModel;
     @Column(name = "serial_number", nullable = false)

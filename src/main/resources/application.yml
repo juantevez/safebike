@@ -1,10 +1,6 @@
 logging:
   level:
-    com:
-      vaadin:
-        flow:
-          spring:
-            SpringInstantiator: ERROR
+    org.springframework.boot.autoconfigure: DEBUG
 
 spring:
   datasource:

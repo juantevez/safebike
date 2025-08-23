@@ -11,10 +11,10 @@ import java.util.Optional;
 public interface BikeRepository extends JpaRepository<BikeEntity, Long> {
 
     List<BikeEntity> findByUser_Id(Long userId);
-    Optional<BikeEntity> findByBrand_BrandId(Integer brandId);
+    Optional<BikeEntity> findByBrand_BrandId(Long brandId);
 
     // ✅ NUEVOS - para buscar por modelo
-    List<BikeEntity> findByBikeModel_IdBikeModel(Integer modelId);
+    List<BikeEntity> findByBikeModel_IdBikeModel(Long modelId);
     List<BikeEntity> findByBikeModel_ModelNameContainingIgnoreCase(String modelName);
 
     Optional<BikeEntity> findBySerialNumber(String serialNumber);

@@ -15,14 +15,18 @@ public class BikeModelEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_bike_model")
-    private Integer idBikeModel;
+    private Long  idBikeModel;
+
+    @Column(name = "model_name", nullable = false, length = 255)
+    private String modelName;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "brand_id", nullable = false)
     private BrandEntity brand;
 
-    @Column(name = "model_name", nullable = false, length = 255)
-    private String modelName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bike_type_id")
+    private BikeTypeEntity bikeType; //
 
     @Column(name = "year_released")
     private Integer yearReleased;

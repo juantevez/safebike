@@ -15,7 +15,7 @@ public interface BrandRepositoryPort {
 
     List<BrandEntity> findAll();
 
-    Optional<BrandEntity> findById(Integer id);
+    Optional<BrandEntity> findById(Long id);
 
     List<BrandEntity> findAllOrderedByName();
 }

@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Bike {
         private String bikeId;
-        private Integer brandId;        // Cambiado de String brand
+        private Long brandId;        // Cambiado de String brand
         private String serialNumber;
-        private Integer bikeTypeId;     // Cambiado de String type
+        private Long bikeTypeId;
         private Integer frameTypeId;    // Cambiado de String frameType
         private LocalDate purchaseDate;
         private double purchaseValue;
         private LocalDateTime createdAt;
 
-        public Bike(Integer brandId, String serialNumber, Integer bikeTypeId, Integer frameTypeId, LocalDate purchaseDate, double purchaseValue) {
+        public Bike(Long brandId, String serialNumber, Long bikeTypeId, Integer frameTypeId, LocalDate purchaseDate, double purchaseValue) {
                 this.brandId = brandId;
                 this.serialNumber = serialNumber;
                 this.bikeTypeId = bikeTypeId;

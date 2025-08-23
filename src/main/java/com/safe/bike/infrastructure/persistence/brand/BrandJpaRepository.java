@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BrandJpaRepository extends JpaRepository<BrandEntity, Integer> {
+public interface BrandJpaRepository extends JpaRepository<BrandEntity, Long> {
     // Los métodos save(), findAll(), findById(), etc., son proporcionados automáticamente.
     @Query("SELECT b FROM BrandEntity b ORDER BY b.name ASC")
     List<BrandEntity> findAllOrderedByName();

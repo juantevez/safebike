@@ -1,22 +1,23 @@
 package com.safe.bike.domain.port.in;
 
 
+import com.safe.bike.domain.model.dto.BikeModelDto;
 import com.safe.bike.domain.model.entity.BikeModelEntity;
-
 import java.util.List;
-import java.util.Optional;
+
+// com.safe.bike.domain.port.in.BikeModelServicePort
 
 public interface BikeModelServicePort {
 
-    List<BikeModelEntity> getAllBikeModels();
+    List<BikeModelDto> getAllBikeModels();
 
-    Optional<BikeModelEntity> getBikeModelById(Integer id);
+    List<BikeModelDto> getModelsByBrand(Long brandId);
 
-    List<BikeModelEntity> getBikeModelsByBrandId(Integer brandId);
+    List<BikeModelDto> getModelsByType(Long typeId);
 
-    BikeModelEntity save(BikeModelEntity bikeModel);
+    List<BikeModelDto> getModelsByBrandAndType(Long brandId, Long typeId);
 
-    void deleteById(Integer id);
-
-    Long countModelsByBrandId(Integer brandId);
+    // Agregar este método
+    List<BikeModelEntity> findAllWithDetails();
 }
+

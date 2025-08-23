@@ -25,8 +25,7 @@ public class BrandServiceImpl implements BrandServicePort {
     }
 
     @Override
-    public Optional<BrandEntity> getBrandById(Integer id) {
-        // Lógica de negocio para obtener una marca por su ID
+    public Optional<BrandEntity> getBrandById(Long id) {
         return brandRepositoryPort.findById(id);
     }
 }
