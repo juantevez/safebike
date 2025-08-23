@@ -30,3 +30,22 @@ body {
 .dark-mode [theme~="icon"] vaadin-button {
     color: #bb86fc;
 }
+
+/* En tu theme o archivo CSS */
+.application {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Para iconos y botones */
+.v-button {
+    -webkit-appearance: none;
+    background-clip: padding-box;
+}
+
+/* Viewport específico para iOS */
+@supports (-webkit-touch-callout: none) {
+    .main-layout {
+        min-height: -webkit-fill-available;
+    }
+}

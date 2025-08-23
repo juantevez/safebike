@@ -1,14 +1,8 @@
 package com.safe.bike.infrastructure.web;
 
 import com.safe.bike.domain.model.dto.BikeModelDto;
-import com.safe.bike.domain.model.entity.BikeEntity;
-import com.safe.bike.domain.model.entity.BikeModelEntity;
-import com.safe.bike.domain.model.entity.BikeTypeEntity;
-import com.safe.bike.domain.model.entity.BrandEntity;
-import com.safe.bike.domain.port.in.BikeModelServicePort;
-import com.safe.bike.domain.port.in.BikeServicePort;
-import com.safe.bike.domain.port.in.BikeTypeServicePort;
-import com.safe.bike.domain.port.in.BrandServicePort;
+import com.safe.bike.domain.model.entity.*;
+import com.safe.bike.domain.port.in.*;
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import com.safe.user.config.JwtUtil;
 import com.safe.user.infrastructure.port.UserServicePort;
@@ -45,6 +39,7 @@ public class BikeFormView extends VerticalLayout {
     private final BikeTypeServicePort bikeTypeService;
     private final UserServicePort userService;
     private final BikeModelServicePort bikeModelServicePort;
+    private final MonedaServicePort monedaServicePort;
     private final JwtUtil jwtUtil;
 
     private ComboBox<BrandEntity> brandComboBox = new ComboBox<>("Marca");
@@ -53,6 +48,8 @@ public class BikeFormView extends VerticalLayout {
 
     private TextField serialNumberField = new TextField("Número de Serie");
     private DatePicker purchaseDateField = new DatePicker("Fecha de Compra");
+
+    private ComboBox<MonedaEntity> monedaComboBox = new ComboBox<>("Moneda");
     private NumberField purchaseValueField = new NumberField("Valor de Compra");
 
     private Button saveButton = new Button("Guardar Bicicleta");
@@ -73,7 +70,7 @@ public class BikeFormView extends VerticalLayout {
             BikeTypeServicePort bikeTypeService,
             UserServicePort userService,
             BikeModelServicePort bikeModelServicePort,
-            JwtUtil jwtUtil) {
+            MonedaServicePort monedaServicePort, JwtUtil jwtUtil) {
 
         logger.info("Inicializando BikeFormView");
 
@@ -82,6 +79,7 @@ public class BikeFormView extends VerticalLayout {
         this.bikeTypeService = bikeTypeService;
         this.userService = userService;
         this.bikeModelServicePort = bikeModelServicePort;
+        this.monedaServicePort = monedaServicePort;
         this.jwtUtil = jwtUtil;
 
         getCurrentUser();
@@ -96,6 +94,7 @@ public class BikeFormView extends VerticalLayout {
                 bikeModelComboBox,
                 serialNumberField,
                 purchaseDateField,
+                monedaComboBox,
                 purchaseValueField
         );
 
@@ -125,6 +124,9 @@ public class BikeFormView extends VerticalLayout {
                     return !purchaseDate.isAfter(LocalDate.now());
                 }, "La fecha de compra debe ser igual o anterior a la fecha actual")
                 .bind(BikeEntity::getPurchaseDate, BikeEntity::setPurchaseDate);
+
+        binder.forField(monedaComboBox)
+                        .bind(BikeEntity::getMoneda, BikeEntity::setMoneda);
 
         binder.forField(purchaseValueField)
                 .bind(BikeEntity::getPurchaseValue, BikeEntity::setPurchaseValue);
@@ -235,6 +237,16 @@ public class BikeFormView extends VerticalLayout {
                 logger.info("Mapeo DTO → Entity creado para {} modelos", dtoToEntityMap.size());
             }
 
+            // Cargar monedas
+            List<MonedaEntity> monedas = monedaServicePort.findAllMonedas();
+            if (monedas != null && !monedas.isEmpty()) {
+                monedaComboBox.setItems(monedas);
+                monedaComboBox.setItemLabelGenerator(moneda -> Objects.toString(moneda.getCodigoMoneda(), "Sin nombre"));
+                logger.info("Marcas cargadas: {}", monedas.size());
+            } else {
+                logger.warn("No hay marcas disponibles");
+                Notification.show("No hay marcas disponibles", 3000, Notification.Position.MIDDLE);
+            }
             configureDynamicModelFiltering();
 
         } catch (Exception e) {

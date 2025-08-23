@@ -20,6 +20,11 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
+vaadin:
+  pwa:
+    enable: true
+  launch-browser: true
+
 jwt:
   secret: myVeryLongAndSecureSecretKeyThatIsAtLeast64CharactersToMeetHS512Standard!
   expiration: 86400
