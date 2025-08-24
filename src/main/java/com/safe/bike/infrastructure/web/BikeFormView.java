@@ -50,6 +50,7 @@ public class BikeFormView extends VerticalLayout {
     private DatePicker purchaseDateField = new DatePicker("Fecha de Compra");
 
     private ComboBox<MonedaEntity> monedaComboBox = new ComboBox<>("Moneda");
+
     private NumberField purchaseValueField = new NumberField("Valor de Compra");
 
     private Button saveButton = new Button("Guardar Bicicleta");
@@ -242,6 +243,8 @@ public class BikeFormView extends VerticalLayout {
             if (monedas != null && !monedas.isEmpty()) {
                 monedaComboBox.setItems(monedas);
                 monedaComboBox.setItemLabelGenerator(moneda -> Objects.toString(moneda.getCodigoMoneda(), "Sin nombre"));
+                monedaComboBox.setWidth("75px");
+                monedaComboBox.getStyle().set("font-family", "monospace");
                 logger.info("Marcas cargadas: {}", monedas.size());
             } else {
                 logger.warn("No hay marcas disponibles");
