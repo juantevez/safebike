@@ -5,12 +5,15 @@ import com.safe.bike.domain.port.in.BikeTypeServicePort;
 import com.safe.bike.domain.port.out.BikeTypeRepositoryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class BikeTypeServiceImpl implements BikeTypeServicePort {
     private static final Logger logger = LoggerFactory.getLogger(BikeTypeServiceImpl.class);
 
@@ -21,6 +24,7 @@ public class BikeTypeServiceImpl implements BikeTypeServicePort {
     }
 
     @Override
+    @Cacheable("allBikesTypes")
     public List<BikeTypeEntity> getAllBikeTypes() {
         logger.info("Obteniendo todos los tipos de bicicletas");
 
@@ -36,6 +40,7 @@ public class BikeTypeServiceImpl implements BikeTypeServicePort {
     }
 
     @Override
+    @Cacheable(value = "bikeTypeById",  key = "#id")
     public Optional<BikeTypeEntity> getBikeTypeById(Integer id) {
         logger.info("Buscando tipo de bicicleta con ID: {}", id);
 

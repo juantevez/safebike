@@ -43,13 +43,27 @@ public class LoginView extends VerticalLayout {
         try {
             String token = authService.login(email.getValue(), password.getValue());
             if (token != null) {
+                System.out.println("✅ Login exitoso, token generado para: " + email.getValue());
+
                 getUI().ifPresent(ui -> {
                     ui.getSession().setAttribute("authToken", token);
                     ui.getSession().setAttribute("userEmail", email.getValue());
-                    ui.navigate("bike-form"); // ← Ir a la vista de BIKE FORM
+
+                    // DEBUGGING: Verificar que se guardó correctamente
+                    String savedToken = (String) ui.getSession().getAttribute("authToken");
+                    String savedEmail = (String) ui.getSession().getAttribute("userEmail");
+
+                    System.out.println("Token guardado en sesión: " + (savedToken != null ? "presente" : "AUSENTE"));
+                    System.out.println("Email guardado en sesión: " + savedEmail);
+
+                    ui.navigate("bike-form");
                 });
+            } else {
+                System.out.println("❌ AuthService retornó token nulo");
+                Notification.show("❌ Error: Token no generado");
             }
         } catch (Exception ex) {
+            System.out.println("❌ Error durante login: " + ex.getMessage());
             Notification.show("❌ " + ex.getMessage());
         }
     }

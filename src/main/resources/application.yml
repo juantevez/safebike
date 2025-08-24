@@ -26,7 +26,7 @@ vaadin:
   launch-browser: true
 
 jwt:
-  secret: myVeryLongAndSecureSecretKeyThatIsAtLeast64CharactersToMeetHS512Standard!
+  secret: MySecretKeyForJWTTokenGenerationThatMustBeAtLeast512BitsLongForHS512AlgorithmToWorkProperlyAndSecurely123456789
   expiration: 86400
 
 server:

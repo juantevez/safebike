@@ -1,21 +1,21 @@
 package com.safe.bike.service;
 
-
 import com.safe.bike.domain.model.dto.BikeModelDto;
 import com.safe.bike.domain.model.entity.BikeModelEntity;
 import com.safe.bike.domain.port.in.BikeModelServicePort;
 import com.safe.bike.domain.port.out.BikeModelRepositoryPort;
-import com.safe.bike.infrastructure.web.BikeFormView;
-import jakarta.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class BikeModelServiceImpl implements BikeModelServicePort {
 
     private static final Logger logger = LoggerFactory.getLogger(BikeModelServiceImpl.class);
@@ -26,6 +26,7 @@ public class BikeModelServiceImpl implements BikeModelServicePort {
     }
 
     @Override
+    @Cacheable("allModels")
     public List<BikeModelDto> getAllBikeModels() {
         return bikeModelRepositoryPort.findAllWithDetails().stream()
                 .map(this::toDto)
@@ -33,6 +34,7 @@ public class BikeModelServiceImpl implements BikeModelServicePort {
     }
 
     @Override
+    @Cacheable(value = "modelByBrand",  key = "#brandId")
     public List<BikeModelDto> getModelsByBrand(Long brandId) {
         return bikeModelRepositoryPort.findByBrandId(brandId).stream()
                 .map(this::toDto)
@@ -40,6 +42,7 @@ public class BikeModelServiceImpl implements BikeModelServicePort {
     }
 
     @Override
+    @Cacheable(value = "modelByType",  key = "#typeId")
     public List<BikeModelDto> getModelsByType(Long typeId) {
         return bikeModelRepositoryPort.findByBikeTypeId(typeId).stream()
                 .map(this::toDto)
@@ -47,6 +50,7 @@ public class BikeModelServiceImpl implements BikeModelServicePort {
     }
 
     @Override
+    @Cacheable(value = "modelByBrandAndType", key = "{#brandId, #typeId}" )
     public List<BikeModelDto> getModelsByBrandAndType(Long brandId, Long typeId) {
         return bikeModelRepositoryPort.findByBrandIdAndBikeTypeId(brandId, typeId).stream()
                 .map(this::toDto)
@@ -54,6 +58,7 @@ public class BikeModelServiceImpl implements BikeModelServicePort {
     }
 
     @Override
+    @Cacheable("allWithDetails")
     public List<BikeModelEntity> findAllWithDetails() {
         logger.info("Obteniendo todos los modelos de bicicleta con detalles");
         try {

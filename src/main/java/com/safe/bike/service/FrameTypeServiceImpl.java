@@ -5,12 +5,15 @@ import com.safe.bike.domain.port.in.FrameTypeServicePort;
 import com.safe.bike.domain.port.out.FrameTypeRepositoryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class FrameTypeServiceImpl implements FrameTypeServicePort {
     private static final Logger logger = LoggerFactory.getLogger(FrameTypeServiceImpl.class);
 
@@ -21,6 +24,7 @@ public class FrameTypeServiceImpl implements FrameTypeServicePort {
     }
 
     @Override
+    @Cacheable("allFrameTypes")
     public List<FrameTypeEntity> getAllFrameTypes() {
         logger.info("Obteniendo todos los tipos de marco");
 
@@ -36,6 +40,7 @@ public class FrameTypeServiceImpl implements FrameTypeServicePort {
     }
 
     @Override
+    @Cacheable(value = "frameTypeById",  key = "#id")
     public Optional<FrameTypeEntity> getFrameTypeById(Integer id) {
         logger.info("Buscando tipo de marco con ID: {}", id);
 
