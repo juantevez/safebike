@@ -1,7 +1,6 @@
 package com.safe.bike.domain.port.out;
 
 import com.safe.bike.domain.model.entity.FrameTypeEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { Debouncer } from '@vaadin/component-base/src/debounce.js';
-import { timeOut, animationFrame } from '@vaadin/component-base/src/async.js';
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.js';
@@ -734,11 +734,19 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.reset = function () {
     cache = {};
-    dataProviderController.clearCache();
+    dataProviderController.rootCache.items = [];
     lastRequestedRanges = {};
-    ensureSubCacheDebouncer?.cancel();
-    parentRequestDebouncer?.cancel();
-    rootRequestDebouncer?.cancel();
+    if (ensureSubCacheDebouncer) {
+      ensureSubCacheDebouncer.cancel();
+    }
+    if (parentRequestDebouncer) {
+      parentRequestDebouncer.cancel();
+    }
+    if (rootRequestDebouncer) {
+      rootRequestDebouncer.cancel();
+    }
+    ensureSubCacheDebouncer = undefined;
+    parentRequestDebouncer = undefined;
     ensureSubCacheQueue = [];
     parentRequestQueue = [];
     updateAllGridRowsInDomBasedOnCache();
@@ -1094,19 +1102,12 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     const path = event.composedPath();
     const idx = path.findIndex((node) => node.localName === 'td' || node.localName === 'th');
-    const cell = path[idx];
     const content = path.slice(0, idx);
 
     // Do not fire item click event if cell content contains focusable elements.
     // Use this instead of event.target to detect cases like icon inside button.
     // See https://github.com/vaadin/flow-components/issues/4065
-    if (
-      content.some((node) => {
-        // Ignore focus buttons that the component renders into cells in focus button mode on MacOS
-        const focusable = cell?._focusButton !== node && isFocusable(node);
-        return focusable || node instanceof HTMLLabelElement;
-      })
-    ) {
+    if (content.some((node) => isFocusable(node) || node instanceof HTMLLabelElement)) {
       return;
     }
 

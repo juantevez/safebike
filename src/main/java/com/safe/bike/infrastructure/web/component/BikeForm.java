@@ -2,10 +2,7 @@ package com.safe.bike.infrastructure.web.component;
 
 import com.safe.bike.domain.model.dto.BikeModelDto;
 import com.safe.bike.domain.model.entity.*;
-import com.safe.bike.domain.port.in.BikeModelServicePort;
-import com.safe.bike.domain.port.in.BikeTypeServicePort;
-import com.safe.bike.domain.port.in.BrandServicePort;
-import com.safe.bike.domain.port.in.MonedaServicePort;
+import com.safe.bike.domain.port.in.*;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
@@ -30,11 +27,13 @@ public class BikeForm extends FormLayout {
     private final BrandServicePort brandService;
     private final BikeTypeServicePort bikeTypeService;
     private final BikeModelServicePort bikeModelServicePort;
+    private final SizeServicePort sizeServicePort;
     private final MonedaServicePort monedaServicePort;
 
     private ComboBox<BrandEntity> brandComboBox = new ComboBox<>("Marca");
     private ComboBox<BikeTypeEntity> bikeTypeComboBox = new ComboBox<>("Tipo de Bicicleta");
     private ComboBox<BikeModelDto> bikeModelComboBox = new ComboBox<>("Modelo");
+    private ComboBox<SizeEntity> sizeBikeComboBox = new ComboBox<>("Tamano");
     private TextField serialNumberField = new TextField("Número de Serie");
     private DatePicker purchaseDateField = new DatePicker("Fecha de Compra");
     private ComboBox<MonedaEntity> monedaComboBox = new ComboBox<>("Moneda");
@@ -49,22 +48,24 @@ public class BikeForm extends FormLayout {
             BrandServicePort brandService,
             BikeTypeServicePort bikeTypeService,
             BikeModelServicePort bikeModelServicePort,
-            MonedaServicePort monedaServicePort) {
+            SizeServicePort sizeServicePort, MonedaServicePort monedaServicePort) {
         this.brandService = brandService;
         this.bikeTypeService = bikeTypeService;
         this.bikeModelServicePort = bikeModelServicePort;
+        this.sizeServicePort = sizeServicePort;
         this.monedaServicePort = monedaServicePort;
 
         configureComponents();
         configureBinder();
         add(brandComboBox, bikeTypeComboBox, bikeModelComboBox,
-                serialNumberField, purchaseDateField, monedaComboBox, purchaseValueField, saveButton);
+                serialNumberField, sizeBikeComboBox, purchaseDateField, monedaComboBox, purchaseValueField, saveButton);
     }
 
     private void configureComponents() {
         brandComboBox.setItemLabelGenerator(brand -> brand.getName());
         bikeTypeComboBox.setItemLabelGenerator(type -> type.getName());
         bikeModelComboBox.setItemLabelGenerator(BikeModelDto::modelName);
+        sizeBikeComboBox.setItemLabelGenerator(SizeEntity::getSigla);
         monedaComboBox.setItemLabelGenerator(moneda -> moneda.getCodigoMoneda());
         monedaComboBox.setWidth("75px");
         monedaComboBox.getStyle().set("font-family", "monospace");
@@ -76,6 +77,7 @@ public class BikeForm extends FormLayout {
     private void loadInitialData() {
         brandComboBox.setItems(brandService.getAllBrands());
         bikeTypeComboBox.setItems(bikeTypeService.getAllBikeTypes());
+        sizeBikeComboBox.setItems(sizeServicePort.findAllSizes());
         monedaComboBox.setItems(monedaServicePort.findAllMonedas());
 
         List<BikeModelEntity> models = bikeModelServicePort.findAllWithDetails();
@@ -97,6 +99,7 @@ public class BikeForm extends FormLayout {
         Runnable updateModels = () -> {
             BrandEntity brand = brandComboBox.getValue();
             BikeTypeEntity type = bikeTypeComboBox.getValue();
+            SizeEntity size = sizeBikeComboBox.getValue();
 
             bikeModelComboBox.clear();
 
@@ -120,6 +123,7 @@ public class BikeForm extends FormLayout {
 
         brandComboBox.addValueChangeListener(e -> updateModels.run());
         bikeTypeComboBox.addValueChangeListener(e -> updateModels.run());
+        sizeBikeComboBox.addValueChangeListener(e -> updateModels.run());
     }
 
     private void setModels(List<BikeModelDto> models, String placeholder) {
@@ -141,6 +145,10 @@ public class BikeForm extends FormLayout {
         binder.forField(bikeTypeComboBox)
                 .asRequired("Requerido")
                 .bind(BikeEntity::getBikeType, BikeEntity::setBikeType);
+
+        binder.forField(sizeBikeComboBox)
+                .asRequired("Requerido")
+                .bind(BikeEntity::getSizeBike, BikeEntity::setSizeBike);
 
         binder.forField(serialNumberField)
                 .asRequired("Requerido")
@@ -181,6 +189,8 @@ public class BikeForm extends FormLayout {
     public ComboBox<BrandEntity> getBrandComboBox() { return brandComboBox; }
     public ComboBox<BikeTypeEntity> getBikeTypeComboBox() { return bikeTypeComboBox; }
     public ComboBox<BikeModelDto> getBikeModelComboBox() { return bikeModelComboBox; }
+
+    public ComboBox<SizeEntity> getSizeBikeComboBox() { return sizeBikeComboBox; }
     public TextField getSerialNumberField() { return serialNumberField; }
     // ... otros getters si son necesarios
 }

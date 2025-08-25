@@ -26,7 +26,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, HasStyle
         header.getStyle().set("padding", "0 20px");
 
         // Título
-        H1 title = new H1("Mi Aplicación");
+        H1 title = new H1("SAVING MY BIKE");
         header.add(title);
 
         // Botón de modo oscuro (llamamos al método privado)

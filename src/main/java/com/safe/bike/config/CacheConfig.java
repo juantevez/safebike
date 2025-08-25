@@ -29,7 +29,8 @@ public class CacheConfig {
                 "allBrands",
                 "allFrameTypes",
                 "frameTypeById",
-                "tokenBlacklist"
+                "tokenBlacklist",
+                "allSizes"
         ));
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(1000)

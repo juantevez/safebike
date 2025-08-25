@@ -39,7 +39,11 @@ public class BikeEntity {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate purchaseDate;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "size_id")
+    private SizeEntity sizeBike;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "moneda_id")
     private MonedaEntity moneda;
     private double purchaseValue;

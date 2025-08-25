@@ -25,7 +25,7 @@ public class HomeView extends VerticalLayout {
         setPadding(true);
 
         // Título de la aplicación
-        H1 title = new H1("Bienvenido a Safe User");
+        H1 title = new H1(".:SAVING MY BIKE:.");
         title.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.TextColor.PRIMARY);
 
         // Contenedor para los botones

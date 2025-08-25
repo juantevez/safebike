@@ -2,10 +2,7 @@ package com.safe.bike.infrastructure.web;
 
 import com.safe.bike.domain.model.entity.BikeEntity;
 import com.safe.bike.domain.model.entity.BikeModelEntity;
-import com.safe.bike.domain.port.in.BikeModelServicePort;
-import com.safe.bike.domain.port.in.BikeTypeServicePort;
-import com.safe.bike.domain.port.in.BrandServicePort;
-import com.safe.bike.domain.port.in.MonedaServicePort;
+import com.safe.bike.domain.port.in.*;
 import com.safe.bike.infrastructure.web.component.BikeForm;
 import com.safe.bike.infrastructure.web.component.BikeFormHeader;
 import com.safe.bike.infrastructure.web.security.CurrentUserManager;
@@ -41,13 +38,14 @@ public class BikeFormView extends VerticalLayout {
             BrandServicePort brandService,
             BikeTypeServicePort bikeTypeService,
             BikeModelServicePort bikeModelServicePort,
+            SizeServicePort sizeServicePort,
             MonedaServicePort monedaServicePort,
             AuthService authService) {
 
         this.bikeFormService = bikeFormService;
         this.currentUserManager = currentUserManager;
 
-        this.bikeForm = new BikeForm(brandService, bikeTypeService, bikeModelServicePort, monedaServicePort);
+        this.bikeForm = new BikeForm(brandService, bikeTypeService, bikeModelServicePort, sizeServicePort, monedaServicePort);
         this.header = new BikeFormHeader(currentUserManager, authService);
 
         add(header, bikeForm);
@@ -88,6 +86,7 @@ public class BikeFormView extends VerticalLayout {
                 bikeForm.readBean(new BikeEntity());
                 bikeForm.getBrandComboBox().clear();
                 bikeForm.getBikeTypeComboBox().clear();
+                bikeForm.getSizeBikeComboBox().clear();
                 bikeForm.getBikeModelComboBox().clear();
             } catch (Exception ex) {
                 logger.error("Error guardando bicicleta", ex);
