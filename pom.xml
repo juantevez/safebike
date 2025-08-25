@@ -58,6 +58,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Para respuesta JSON estructurada -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -106,6 +111,27 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.vaadin/vaadin-maven-plugin -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-maven-plugin</artifactId>
+            <version>24.7.0</version>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -142,7 +168,7 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>vaadin-maven-plugin</artifactId>
-                        <version>24.3.0</version> <!-- ✅ Versión existente -->
+                        <version>24.7.0</version> <!-- ✅ Versión existente -->
                         <executions>
                             <execution>
                                 <id>frontend</id>
