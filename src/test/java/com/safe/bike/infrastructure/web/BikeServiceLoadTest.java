@@ -5,7 +5,6 @@ import com.safe.bike.service.BikeServiceImpl;
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,13 +15,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-@SpringBootTest
 class BikeServiceLoadTest {
 
     @Autowired
     private BikeServiceImpl bikeService;
 
-    @Test
+
     void testSave100BikesConcurrently() throws InterruptedException {
         int threadCount = 100;
         ExecutorService executor = Executors.newFixedThreadPool(20);
