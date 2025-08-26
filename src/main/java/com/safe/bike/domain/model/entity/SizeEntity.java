@@ -1,8 +1,12 @@
 package com.safe.bike.domain.model.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "size_bike")
@@ -10,24 +14,27 @@ public class SizeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Integer id;
 
     @Column(name = "sigla", length = 20, nullable = false)
     private String sigla;
 
-    @Size(max = 100, message = "El nombre de la moneda no puede exceder 50 caracteres")
     @Column(name = "description", length = 100, nullable = false)
-    private String sizeDescription;
+    private String description;
 
-    public SizeEntity() {   }
+    // ❌ Eliminar: @ManyToOne a BikeModelEntity
+    // ❌ Eliminar: Set<BikeModelEntity> bikeModels
 
-    public SizeEntity(Integer id, String sigla, String sizeDescription) {
+    // Constructores
+    public SizeEntity() { }
+
+    public SizeEntity(Integer id, String sigla, String description) {
         this.id = id;
         this.sigla = sigla;
-        this.sizeDescription = sizeDescription;
+        this.description = description;
     }
 
+    // Getters y Setters
     public Integer getId() {
         return id;
     }
@@ -44,11 +51,35 @@ public class SizeEntity {
         this.sigla = sigla;
     }
 
-    public String getSizeDescription() {
-        return sizeDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSizeDescription(String sizeDescription) {
-        this.sizeDescription = sizeDescription;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    // toString, equals, hashCode (opcionales pero recomendados)
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SizeEntity)) return false;
+        SizeEntity that = (SizeEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "SizeEntity{" +
+                "id=" + id +
+                ", sigla='" + sigla + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

@@ -4,6 +4,8 @@ import com.safe.bike.domain.model.entity.BikeEntity;
 import com.safe.bike.domain.port.in.BikeServicePort;
 import com.safe.bike.infrastructure.persistence.bike.BikeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +13,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class BikeServiceImpl implements BikeServicePort {
-
+    private static final Logger logger = LoggerFactory.getLogger(BikeServiceImpl.class);
     // Inyecta directamente la interfaz de Spring Data JPA
     private final BikeRepository bikeRepository;
 

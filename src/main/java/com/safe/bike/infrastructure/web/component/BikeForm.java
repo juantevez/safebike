@@ -33,7 +33,7 @@ public class BikeForm extends FormLayout {
     private ComboBox<BrandEntity> brandComboBox = new ComboBox<>("Marca");
     private ComboBox<BikeTypeEntity> bikeTypeComboBox = new ComboBox<>("Tipo de Bicicleta");
     private ComboBox<BikeModelDto> bikeModelComboBox = new ComboBox<>("Modelo");
-    private ComboBox<SizeEntity> sizeBikeComboBox = new ComboBox<>("Tamano");
+    private ComboBox<SizeEntity> sizeBikeComboBox = new ComboBox<>("Talle");
     private TextField serialNumberField = new TextField("Número de Serie");
     private DatePicker purchaseDateField = new DatePicker("Fecha de Compra");
     private ComboBox<MonedaEntity> monedaComboBox = new ComboBox<>("Moneda");
@@ -48,7 +48,8 @@ public class BikeForm extends FormLayout {
             BrandServicePort brandService,
             BikeTypeServicePort bikeTypeService,
             BikeModelServicePort bikeModelServicePort,
-            SizeServicePort sizeServicePort, MonedaServicePort monedaServicePort) {
+            SizeServicePort sizeServicePort,
+            MonedaServicePort monedaServicePort) {
         this.brandService = brandService;
         this.bikeTypeService = bikeTypeService;
         this.bikeModelServicePort = bikeModelServicePort;
@@ -57,31 +58,59 @@ public class BikeForm extends FormLayout {
 
         configureComponents();
         configureBinder();
-        add(brandComboBox, bikeTypeComboBox, bikeModelComboBox,
-                serialNumberField, sizeBikeComboBox, purchaseDateField, monedaComboBox, purchaseValueField, saveButton);
+        add(
+                brandComboBox,
+                bikeTypeComboBox,
+                bikeModelComboBox,
+                serialNumberField,
+                sizeBikeComboBox,
+                purchaseDateField,
+                monedaComboBox,
+                purchaseValueField,
+                saveButton
+        );
     }
 
+    private final Map<BikeModelEntity, BikeModelDto> entityToDtoMap = new HashMap<>();
     private void configureComponents() {
+        // Marca
         brandComboBox.setItemLabelGenerator(brand -> brand.getName());
+        brandComboBox.setPlaceholder("Seleccione una marca");
+
+        // Tipo de bicicleta
         bikeTypeComboBox.setItemLabelGenerator(type -> type.getName());
+        bikeTypeComboBox.setPlaceholder("Seleccione un tipo");
+
+        // Modelo
         bikeModelComboBox.setItemLabelGenerator(BikeModelDto::modelName);
+        bikeModelComboBox.setPlaceholder("Seleccione marca y tipo");
+        bikeModelComboBox.setEnabled(false);
+
+        // Talle → siempre habilitado y con todos los tamaños
         sizeBikeComboBox.setItemLabelGenerator(SizeEntity::getSigla);
+        sizeBikeComboBox.setPlaceholder("Seleccione un tamaño");
+        sizeBikeComboBox.setEnabled(true); // Siempre habilitado
+
+        // Moneda
         monedaComboBox.setItemLabelGenerator(moneda -> moneda.getCodigoMoneda());
         monedaComboBox.setWidth("75px");
         monedaComboBox.getStyle().set("font-family", "monospace");
 
+        // Cargar datos iniciales
         loadInitialData();
+
+        // Configurar filtros dinámicos (solo marca → tipo → modelo)
         configureDynamicFiltering();
     }
 
     private void loadInitialData() {
         brandComboBox.setItems(brandService.getAllBrands());
         bikeTypeComboBox.setItems(bikeTypeService.getAllBikeTypes());
-        sizeBikeComboBox.setItems(sizeServicePort.findAllSizes());
+        sizeBikeComboBox.setItems(sizeServicePort.findAllSizes()); // Todos los tamaños
         monedaComboBox.setItems(monedaServicePort.findAllMonedas());
 
+        // Cargar modelos con detalles para el mapeo DTO → Entity
         List<BikeModelEntity> models = bikeModelServicePort.findAllWithDetails();
-        dtoToEntityMap.clear();
         for (BikeModelEntity entity : models) {
             BikeModelDto dto = new BikeModelDto(
                     entity.getIdBikeModel(),
@@ -92,6 +121,7 @@ public class BikeForm extends FormLayout {
                     entity.getBikeType().getName()
             );
             dtoToEntityMap.put(dto, entity);
+            entityToDtoMap.put(entity, dto); // ✅ Nuevo
         }
     }
 
@@ -99,7 +129,6 @@ public class BikeForm extends FormLayout {
         Runnable updateModels = () -> {
             BrandEntity brand = brandComboBox.getValue();
             BikeTypeEntity type = bikeTypeComboBox.getValue();
-            SizeEntity size = sizeBikeComboBox.getValue();
 
             bikeModelComboBox.clear();
 
@@ -123,7 +152,6 @@ public class BikeForm extends FormLayout {
 
         brandComboBox.addValueChangeListener(e -> updateModels.run());
         bikeTypeComboBox.addValueChangeListener(e -> updateModels.run());
-        sizeBikeComboBox.addValueChangeListener(e -> updateModels.run());
     }
 
     private void setModels(List<BikeModelDto> models, String placeholder) {
@@ -132,6 +160,7 @@ public class BikeForm extends FormLayout {
             bikeModelComboBox.setEnabled(true);
             bikeModelComboBox.setPlaceholder("Seleccione un modelo");
         } else {
+            bikeModelComboBox.clear();
             bikeModelComboBox.setEnabled(false);
             bikeModelComboBox.setPlaceholder(placeholder);
         }
@@ -145,6 +174,21 @@ public class BikeForm extends FormLayout {
         binder.forField(bikeTypeComboBox)
                 .asRequired("Requerido")
                 .bind(BikeEntity::getBikeType, BikeEntity::setBikeType);
+
+        binder.forField(bikeModelComboBox)
+                .withConverter(
+                        // Converter: de DTO → Entity
+                        dto -> dto != null ? dtoToEntityMap.get(dto) : null,
+                        // Reverse converter: de Entity → DTO
+                        entity -> entity != null ? entityToDtoMap.get(entity) : null
+                )
+                .asRequired("Requerido")
+                .bind(
+                        // Getter: cómo obtener el valor del modelo (BikeEntity)
+                        BikeEntity::getBikeModel,
+                        // Setter: cómo asignarlo
+                        BikeEntity::setBikeModel
+                );
 
         binder.forField(sizeBikeComboBox)
                 .asRequired("Requerido")
@@ -186,11 +230,13 @@ public class BikeForm extends FormLayout {
         return dto != null ? dtoToEntityMap.get(dto) : null;
     }
 
+    // Getters (opcionales, si los necesitas desde fuera)
     public ComboBox<BrandEntity> getBrandComboBox() { return brandComboBox; }
     public ComboBox<BikeTypeEntity> getBikeTypeComboBox() { return bikeTypeComboBox; }
     public ComboBox<BikeModelDto> getBikeModelComboBox() { return bikeModelComboBox; }
-
     public ComboBox<SizeEntity> getSizeBikeComboBox() { return sizeBikeComboBox; }
     public TextField getSerialNumberField() { return serialNumberField; }
-    // ... otros getters si son necesarios
+    public DatePicker getPurchaseDateField() { return purchaseDateField; }
+    public ComboBox<MonedaEntity> getMonedaComboBox() { return monedaComboBox; }
+    public NumberField getPurchaseValueField() { return purchaseValueField; }
 }

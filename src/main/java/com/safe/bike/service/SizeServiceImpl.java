@@ -3,40 +3,32 @@ package com.safe.bike.service;
 import com.safe.bike.domain.model.entity.SizeEntity;
 import com.safe.bike.domain.port.in.SizeServicePort;
 import com.safe.bike.domain.port.out.SizeRepositoryPort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true)
 public class SizeServiceImpl implements SizeServicePort {
 
-    private static final Logger logger = LoggerFactory.getLogger(MonedaServiceImpl.class);
-
     private final SizeRepositoryPort sizeRepositoryPort;
-
 
     public SizeServiceImpl(SizeRepositoryPort sizeRepositoryPort) {
         this.sizeRepositoryPort = sizeRepositoryPort;
     }
 
     @Override
-    @Cacheable("allSizes")
     public List<SizeEntity> findAllSizes() {
-        logger.info("Obteniendo todos las monedas");
+        return sizeRepositoryPort.findAll();
+    }
 
-        try {
-            List<SizeEntity> tamanos = sizeRepositoryPort.findAll();
-            logger.info("Se encontraron {} monedas: ", tamanos.size());
-            logger.debug("Tipos de monedas obtenidas: {}", tamanos);
-            return tamanos;
-        } catch (Exception e) {
-            logger.error("Error al obtener todos los tipos de bicicletas", e);
-            throw e;
-        }
+    @Override
+    public Optional<SizeEntity> getSizeById(Integer id) {
+        return sizeRepositoryPort.findById(id);
+    }
+
+    @Override
+    public List<SizeEntity> getSizesByModelId(Long modelId) {
+        return sizeRepositoryPort.findByModelId(modelId);
     }
 }

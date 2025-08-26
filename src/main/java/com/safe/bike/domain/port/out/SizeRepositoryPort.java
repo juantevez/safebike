@@ -11,5 +11,7 @@ public interface SizeRepositoryPort {
         List<SizeEntity> findAll();
         Optional<SizeEntity> findById(Integer id);
 
+        // ✅ Nuevo método
+        List<SizeEntity> findByModelId(Long modelId);
 }
 

@@ -1,9 +1,0 @@
-package com.safe.bike.infrastructure.adapter.in.web.validation.enums;
-
-public enum BicycleType {
-    ROAD,AERO, ENDURANCE, TRIATHLON, GRAVEL, CYCLOCROSS,
-    MTB, DOUBLE, HARDTAIL, XC_MARATHON, TRAIL, ALL_MOUNTAIN, ENDURO, DOWNHILL, TOURING,
-    MISC, COMMUTER, URBAN, COMFORT, CRUISER, FITNESS, HYBRID,
-    KIDS, FROM3_TO7, FROM7_TO12, FROM12_T16,
-    OTHER;
-}

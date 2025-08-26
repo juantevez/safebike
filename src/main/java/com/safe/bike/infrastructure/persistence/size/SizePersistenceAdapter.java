@@ -61,4 +61,23 @@ public class SizePersistenceAdapter implements SizeRepositoryPort {
             throw e;
         }
     }
+
+    @Override
+    public List<SizeEntity> findByModelId(Long modelId) {
+        logger.info("Consultando tamaños disponibles para el modelo ID: {}", modelId);
+
+        if (modelId == null) {
+            logger.warn("No se puede buscar tamaños con modelId nulo");
+            return List.of();
+        }
+
+        try {
+            List<SizeEntity> sizes = sizeJpaRepository.findByModelId(modelId);
+            logger.info("Se encontraron {} tamaños para el modelo {}", sizes.size(), modelId);
+            return sizes;
+        } catch (Exception e) {
+            logger.error("Error al consultar tamaños por modelo ID: {}", modelId, e);
+            throw e;
+        }
+    }
 }

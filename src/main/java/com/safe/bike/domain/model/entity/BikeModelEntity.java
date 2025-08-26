@@ -6,6 +6,8 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "bike_model")
@@ -24,7 +26,7 @@ public class BikeModelEntity {
     @JoinColumn(name = "brand_id", nullable = false)
     private BrandEntity brand;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bike_type_id")
     private BikeTypeEntity bikeType; //
 
