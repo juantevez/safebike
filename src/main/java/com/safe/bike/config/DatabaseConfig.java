@@ -8,6 +8,7 @@ public class DatabaseConfig {
 
     private final BikeRepository bikeRepository;
 
+
     public DatabaseConfig(BikeRepository bikeRepository) {
         this.bikeRepository = bikeRepository;
     }

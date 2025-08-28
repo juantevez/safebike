@@ -1,0 +1,10 @@
+package com.safe.location.domain.port.in;
+
+import com.safe.location.domain.model.entity.MunicipioEntity;
+
+import java.util.List;
+
+public interface MunicipalidadServicePort {
+
+    List<MunicipioEntity> findAllMunicipios();
+}

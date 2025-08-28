@@ -30,7 +30,10 @@ public class CacheConfig {
                 "allFrameTypes",
                 "frameTypeById",
                 "tokenBlacklist",
-                "allSizes"
+                "allSizes",
+                "allProvincias",
+                "allMunicipios",
+                "allLocalidades"
         ));
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(1000)

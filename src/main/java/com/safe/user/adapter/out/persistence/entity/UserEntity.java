@@ -1,5 +1,8 @@
 package com.safe.user.adapter.out.persistence.entity;
 
+import com.safe.location.domain.model.entity.LocalidadEntity;
+import com.safe.location.domain.model.entity.MunicipioEntity;
+import com.safe.location.domain.model.entity.ProvinciaEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -40,6 +43,18 @@ public class UserEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // ✅ RELACIONES GEOGRÁFICAS
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "localidad_id")
+    private LocalidadEntity localidad;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "municipio_id")
+    private MunicipioEntity municipio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provincia_id")
+    private ProvinciaEntity provincia;
 
     // Constructor por defecto
     public UserEntity() {
@@ -52,6 +67,19 @@ public class UserEntity {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    // Constructor con ubicación
+    public UserEntity(String username, String email, String password, String firstName, String lastName,
+                      LocalidadEntity localidad, MunicipioEntity municipio, ProvinciaEntity provincia) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.localidad = localidad;
+        this.municipio = municipio;
+        this.provincia = provincia;
     }
 
     @PrePersist
@@ -130,6 +158,52 @@ public class UserEntity {
         return firstName + " " + lastName;
     }
 
+    // ✅ GETTERS Y SETTERS GEOGRÁFICOS
+    public LocalidadEntity getLocalidad() {
+        return localidad;
+    }
+
+    public void setLocalidad(LocalidadEntity localidad) {
+        this.localidad = localidad;
+    }
+
+    public MunicipioEntity getMunicipio() {
+        return municipio;
+    }
+
+    public void setMunicipio(MunicipioEntity municipio) {
+        this.municipio = municipio;
+    }
+
+    public ProvinciaEntity getProvincia() {
+        return provincia;
+    }
+
+    public void setProvincia(ProvinciaEntity provincia) {
+        this.provincia = provincia;
+    }
+
+    // ✅ MÉTODOS DE CONVENIENCIA GEOGRÁFICOS
+    public String getFullAddress() {
+        StringBuilder address = new StringBuilder();
+        if (localidad != null) {
+            address.append(localidad.getNombre());
+        }
+        if (municipio != null) {
+            if (address.length() > 0) address.append(", ");
+            address.append(municipio.getNombre());
+        }
+        if (provincia != null) {
+            if (address.length() > 0) address.append(", ");
+            address.append(provincia.getNombre());
+        }
+        return address.toString();
+    }
+
+    public boolean hasCompleteAddress() {
+        return localidad != null && municipio != null && provincia != null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -153,6 +227,9 @@ public class UserEntity {
                 ", email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", localidad=" + (localidad != null ? localidad.getNombre() : null) +
+                ", municipio=" + (municipio != null ? municipio.getNombre() : null) +
+                ", provincia=" + (provincia != null ? provincia.getNombre() : null) +
                 ", createdAt=" + createdAt +
                 '}';
     }

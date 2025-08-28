@@ -13,12 +13,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories({
         "com.safe.bike.infrastructure.persistence",
         "com.safe.user.adapter.out.persistence.repository",
-        "com.safe.loadphoto.infrastructure.persistence"
+        "com.safe.loadphoto.infrastructure.persistence",
+        "com.safe.location.infrastructure.persistence"
 })
 @EntityScan({
         "com.safe.bike.domain.model.entity",
         "com.safe.user.adapter.out.persistence.entity",
-        "package com.safe.loadphoto.domain.model.entity"
+        "com.safe.loadphoto.domain.model.entity",
+        "com.safe.location.domain.model.entity"
 })
 public class BikeSafeApplication {
 

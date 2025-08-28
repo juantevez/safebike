@@ -2,6 +2,8 @@ package com.safe.bike.infrastructure.persistence.bike;
 
 import com.safe.bike.domain.model.entity.BikeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +18,6 @@ public interface BikeRepository extends JpaRepository<BikeEntity, Long> {
     // ✅ NUEVOS - para buscar por modelo
     List<BikeEntity> findByBikeModel_IdBikeModel(Long modelId);
     List<BikeEntity> findByBikeModel_ModelNameContainingIgnoreCase(String modelName);
-
     Optional<BikeEntity> findBySerialNumber(String serialNumber);
+
 }

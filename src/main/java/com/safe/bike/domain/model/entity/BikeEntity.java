@@ -1,6 +1,9 @@
 package com.safe.bike.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.safe.location.domain.model.entity.LocalidadEntity;
+import com.safe.location.domain.model.entity.MunicipioEntity;
+import com.safe.location.domain.model.entity.ProvinciaEntity;
 import com.safe.user.adapter.out.persistence.entity.UserEntity;
 import com.safe.user.model.User;
 import jakarta.persistence.*;
@@ -55,4 +58,16 @@ public class BikeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "localidad_id")
+    private LocalidadEntity localidad;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "municipio_id")
+    private MunicipioEntity municipio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provincia_id")
+    private ProvinciaEntity provincia;
 }
