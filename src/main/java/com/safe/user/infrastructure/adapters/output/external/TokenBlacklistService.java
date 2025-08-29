@@ -1,4 +1,4 @@
-package com.safe.user.application.service;
+package com.safe.user.infrastructure.adapters.output.external;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;

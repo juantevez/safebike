@@ -1,4 +1,4 @@
-package com.safe.user.config;
+package com.safe.user.infrastructure.adapters.input.security;
 
 import com.safe.user.application.service.UserServiceImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        com.safe.user.model.User user = userService.findByEmail(email);
+        com.safe.user.domain.model.User user = userService.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("Usuario no encontrado: " + email);
         }

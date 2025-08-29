@@ -1,4 +1,4 @@
-package com.safe.user.infrastructure.web;
+package com.safe.user.infrastructure.adapters.input.web;
 
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.button.Button;

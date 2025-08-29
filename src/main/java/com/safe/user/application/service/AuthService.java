@@ -1,8 +1,8 @@
 package com.safe.user.application.service;
 
 
-import com.safe.bike.service.FrameTypeServiceImpl;
 import com.safe.user.config.JwtUtil;
+import com.safe.user.infrastructure.adapters.output.external.TokenBlacklistService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,8 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
 
 @Service
 public class AuthService {

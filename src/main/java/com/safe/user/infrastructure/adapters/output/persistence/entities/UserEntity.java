@@ -1,4 +1,4 @@
-package com.safe.user.adapter.out.persistence.entity;
+package com.safe.user.infrastructure.adapters.output.persistence.entities;
 
 import com.safe.location.domain.model.entity.LocalidadEntity;
 import com.safe.location.domain.model.entity.MunicipioEntity;

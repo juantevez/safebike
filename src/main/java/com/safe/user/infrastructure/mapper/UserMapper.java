@@ -1,8 +1,8 @@
 package com.safe.user.infrastructure.mapper;
 
 
-import com.safe.user.adapter.out.persistence.entity.UserEntity;
-import com.safe.user.model.User;
+import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
+import com.safe.user.domain.model.User;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

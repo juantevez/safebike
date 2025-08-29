@@ -1,4 +1,4 @@
-package com.safe.user.config;
+package com.safe.user.infrastructure.adapters.input.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

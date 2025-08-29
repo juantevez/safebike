@@ -2,8 +2,7 @@ package com.safe.bike.infrastructure.web;
 
 import com.safe.bike.domain.model.entity.*;
 import com.safe.bike.service.BikeServiceImpl;
-import com.safe.user.adapter.out.persistence.entity.UserEntity;
-import org.junit.jupiter.api.Test;
+import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;

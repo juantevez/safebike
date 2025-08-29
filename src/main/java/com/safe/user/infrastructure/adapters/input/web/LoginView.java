@@ -1,4 +1,4 @@
-package com.safe.user.infrastructure.web;
+package com.safe.user.infrastructure.adapters.input.web;
 
 import com.safe.user.application.service.AuthService;
 import com.vaadin.flow.component.button.Button;

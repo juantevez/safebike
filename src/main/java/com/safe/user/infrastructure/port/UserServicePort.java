@@ -1,7 +1,7 @@
 package com.safe.user.infrastructure.port;
 
-import com.safe.user.adapter.out.persistence.entity.UserEntity;
-import com.safe.user.model.User;
+import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
+import com.safe.user.domain.model.User;
 
 import java.util.List;
 import java.util.Optional;

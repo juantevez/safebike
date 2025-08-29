@@ -2,7 +2,7 @@ package com.safe.bike.infrastructure.web.security;
 
 import com.safe.user.config.JwtUtil;
 import com.safe.user.infrastructure.port.UserServicePort;
-import com.safe.user.model.User;
+import com.safe.user.domain.model.User;
 import com.vaadin.flow.server.VaadinSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
