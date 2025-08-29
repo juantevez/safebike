@@ -11,4 +11,6 @@ public interface BikeServicePort {
     Optional<BikeEntity> getBikeById(Long id);
     List<BikeEntity> getAllBikes();
     Optional<BikeEntity> getBikesByBrand(Long brand); // Agregar este método
+    // Agregar este método
+    List<BikeEntity> getBikesByUserId(Long userId);
 }

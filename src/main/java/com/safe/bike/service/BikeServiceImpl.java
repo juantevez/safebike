@@ -53,4 +53,12 @@ public class BikeServiceImpl implements BikeServicePort {
     public Optional<BikeEntity> getBikesByBrand(Long brand) {
         return bikeRepository.findByBrand_BrandId(brand);
     }
+
+    @Override
+    public List<BikeEntity> getBikesByUserId(Long userId) {
+        return bikeRepository.findByUser_Id(userId);
+    }
 }
+
+//// ✅ Correcto
+//List<BikeEntity> findByUser_Id(Long id);

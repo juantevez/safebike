@@ -21,7 +21,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/login", "/register", "/VAADIN/**", "/frontend/**", "/images/**", "/manifest.json", "/sw.js")
+                        .requestMatchers("/", "/login", "/register", "/VAADIN/**", "/frontend/**", "/images/**", "/manifest.json", "/sw.js", "/photo-load")
                         .permitAll()
                         .requestMatchers("/bike-form/**").authenticated()
                         .anyRequest()
@@ -36,6 +36,11 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .permitAll()
                         .defaultSuccessUrl("/bike-form", true) // Opcional: redirigir después del login
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                        .defaultSuccessUrl("/photo-load", true) // Opcional: redirigir después del login
                 );
 
         return http.build();
