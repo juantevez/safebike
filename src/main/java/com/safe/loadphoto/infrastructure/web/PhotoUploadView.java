@@ -6,6 +6,7 @@ import com.safe.loadphoto.domain.model.PhotoExif;
 import com.safe.loadphoto.domain.port.in.PhotoExifServicePort;
 import com.safe.user.domain.model.User;
 import com.safe.user.infrastructure.adapters.input.security.SecurityService;
+import com.safe.user.infrastructure.adapters.output.persistence.repositories.UserRepositoryAdapter;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.*;
@@ -22,6 +23,8 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,6 +34,7 @@ import java.util.List;
 @PageTitle("Subir Fotografías de Bicicleta")
 public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserver {
 
+    private static final Logger logger = LoggerFactory.getLogger(PhotoUploadView.class);
     private final PhotoExifServicePort photoExifService;
     private final BikeServicePort bikeService; // Servicio para obtener bicicletas
     private final SecurityService securityService; // Servicio de seguridad para obtener usuario actual
@@ -64,14 +68,21 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        logger.info("beforeEnter");
         // Obtener el usuario actual
         currentUser = securityService.getAuthenticatedUser();
 
+        // Verificar PRIMERO si currentUser es null
         if (currentUser == null) {
+            logger.info("No authenticated user found, redirecting to login");
             // Redirigir al login si no hay usuario autenticado
             event.forwardTo("login");
             return;
         }
+
+        // Solo loggear si currentUser NO es null
+        logger.info("currentUser EMAIL: {}", currentUser.getEmail());
+        logger.info("currentUser ID: {}", currentUser.getId());
 
         // Inicializar la vista después de confirmar que hay usuario
         initializeView();
@@ -79,6 +90,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
     }
 
     private void initializeView() {
+        logger.info("initializeView");
         createHeader();
         createBikeSelector();
         createUploadArea();
@@ -88,6 +100,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
     }
 
     private void createHeader() {
+        logger.info("createHeader");
         H2 title = new H2("📸 Subir Fotografías de Bicicleta");
         title.getStyle().set("margin-bottom", "20px");
         add(title);
@@ -106,19 +119,6 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
         description.getStyle().set("color", "var(--lumo-secondary-text-color)");
         add(description);
     }
-
- //  private void createBikeSelector() {
- //      bikeSelect = new Select<>();
- //      bikeSelect.setLabel("🚴 Seleccionar Bicicleta");
- //      bikeSelect.setPlaceholder("Elige la bicicleta para asociar las fotos");
- //      bikeSelect.setWidthFull();
-
- //      // Configurar cómo mostrar las bicicletas en el selector
- //      bikeSelect.setItemLabelGenerator(bike ->
- //              bike.getBrand() + " " + bike.getBikeModel() + " - Serial: " + bike.getSerialNumber());
-
- //      add(bikeSelect);
- //  }
 
     private void createBikeSelector() {
         bikeSelect = new Select<>();
@@ -154,10 +154,13 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
     }
 
     private void loadUserBikes() {
+        logger.info("loadUserBikes");
         try {
             // Cargar las bicicletas del usuario actual directamente como entities
             List<BikeEntity> userBikes = bikeService.getBikesByUserId(currentUser.getId());
-
+            logger.info("BikeEntity tamano: ", userBikes.size());
+            logger.info("BikeEntity getBikeId: ", userBikes.get(0).getBikeId());
+            logger.info("BikeEntity getBikeId: ", userBikes.get(0).getBikeModel());
             if (userBikes.isEmpty()) {
                 // Mostrar mensaje si no hay bicicletas registradas
                 Notification notification = Notification.show(

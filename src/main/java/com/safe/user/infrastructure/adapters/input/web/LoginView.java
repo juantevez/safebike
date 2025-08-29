@@ -12,9 +12,11 @@ import com.vaadin.flow.component.textfield.Autocapitalize;
 import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "login", layout = MainLayout.class)
+@PageTitle("Login")
 public class LoginView extends VerticalLayout {
 
     private final AuthService authService;

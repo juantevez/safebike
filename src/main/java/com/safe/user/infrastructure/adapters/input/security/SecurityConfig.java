@@ -11,7 +11,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-// SecurityConfig.java
+
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -21,26 +22,30 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/login", "/register", "/VAADIN/**", "/frontend/**", "/images/**", "/manifest.json", "/sw.js", "/photo-load")
-                        .permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/login",
+                                "/register",
+                                "/VAADIN/**",
+                                "/frontend/**",
+                                "/images/**",
+                                "/manifest.json",
+                                "/sw.js",
+                                "/load-photo",  // ← Corregido
+                                "/photo-load"   // ← Mantén ambos si usas los dos
+                        ).permitAll()
                         .requestMatchers("/bike-form/**").authenticated()
-                        .anyRequest()
-                        .authenticated()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // ✅ CAMBIAR ESTO
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
-                        .defaultSuccessUrl("/bike-form", true) // Opcional: redirigir después del login
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                        .defaultSuccessUrl("/photo-load", true) // Opcional: redirigir después del login
+                        .defaultSuccessUrl("/load-photo", true) // ← Una sola configuración
                 );
 
         return http.build();
@@ -57,3 +62,51 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 }
+
+//
+//// SecurityConfig.java
+//@Configuration
+//@EnableWebSecurity
+//public class SecurityConfig {
+//
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(authz -> authz
+//                        .requestMatchers("/", "/login", "/register", "/VAADIN/**", "/frontend/**", "/images/**", "/manifest.json", "/sw.js", "/photo-load")
+//                        .permitAll()
+//                        .requestMatchers("/bike-form/**").authenticated()
+//                        .anyRequest()
+//                        .authenticated()
+//                )
+//                .sessionManagement(session -> session
+//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // ✅ CAMBIAR ESTO
+//                        .maximumSessions(1)
+//                        .maxSessionsPreventsLogin(false)
+//                )
+//                .formLogin(form -> form
+//                        .loginPage("/login")
+//                        .permitAll()
+//                        .defaultSuccessUrl("/bike-form", true) // Opcional: redirigir después del login
+//                )
+//                .formLogin(form -> form
+//                        .loginPage("/login")
+//                        .permitAll()
+//                        .defaultSuccessUrl("/photo-load", true) // Opcional: redirigir después del login
+//                );
+//
+//        return http.build();
+//    }
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+//
+//    @Bean
+//    public AuthenticationManager authenticationManager(
+//            AuthenticationConfiguration authConfig) throws Exception {
+//        return authConfig.getAuthenticationManager();
+//    }
+//}
