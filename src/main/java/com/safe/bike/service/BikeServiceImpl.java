@@ -82,7 +82,7 @@ public class BikeServiceImpl implements BikeServicePort {
                     String modelName = "Modelo desconocido";
                     String serialNumber = bike.getSerialNumber() != null ? bike.getSerialNumber() : "Sin número de serie";
 
-                    // Acceso seguro a Brand
+                    // Acceso seguro a BrandEntity
                     if (bike.getBrand() != null) {
                         brandName = bike.getBrand().getName(); // Hibernate carga la entidad aquí
                     }

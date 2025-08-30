@@ -1,8 +1,11 @@
 package com.safe.loadphoto.infrastructure.web;
 
 
+import com.safe.bike.domain.model.dto.BikeForPhotoDTO;
+import com.safe.bike.infrastructure.persistence.bike.BikeRepository;
 import com.safe.loadphoto.domain.model.PhotoExif;
 import com.safe.loadphoto.domain.port.in.PhotoExifServicePort;
+import com.safe.user.application.service.UserServiceImpl;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -20,20 +23,25 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
 @Route("photo-upload")
 @PageTitle("Subir Fotografías de Bicicleta")
 public class PhotoUploadView extends VerticalLayout {
-
+    private static final Logger logger = LoggerFactory.getLogger(PhotoUploadView.class);
     private final PhotoExifServicePort photoExifService;
 
     private Upload upload;
     private MemoryBuffer buffer;
     private Button processButton;
-    private Select<String> bikeSelect;
+    private Select<BikeForPhotoDTO> bikeSelect;
     private TextField fileNameField;
 
     // Contenedores para mostrar resultados
@@ -44,8 +52,13 @@ public class PhotoUploadView extends VerticalLayout {
     private byte[] currentFileData;
     private String currentFileName;
 
-    public PhotoUploadView(PhotoExifServicePort photoExifService) {
+    BikeRepository bikeRepository;
+    UserServiceImpl userService;
+
+    public PhotoUploadView(PhotoExifServicePort photoExifService, UserServiceImpl userService, BikeRepository bikeRepository) {
         this.photoExifService = photoExifService;
+        this.bikeRepository = bikeRepository;
+        this.userService  = userService;
 
         setSizeFull();
         setPadding(true);
@@ -72,17 +85,45 @@ public class PhotoUploadView extends VerticalLayout {
         add(description);
     }
 
+    @Transactional(readOnly = true) // ✅ Mantener la sesión abierta
     private void createBikeSelector() {
         bikeSelect = new Select<>();
         bikeSelect.setLabel("🚴 Seleccionar Bicicleta");
         bikeSelect.setPlaceholder("Elige la bicicleta para asociar las fotos");
         bikeSelect.setWidthFull();
 
-        // TODO: Cargar las bicicletas del usuario actual desde el servicio
-        // Por ahora simulamos con datos de ejemplo
-        bikeSelect.setItems("Trek Mountain Bike - Serial: ABC123",
-                "Giant Road Bike - Serial: XYZ789",
-                "Specialized BMX - Serial: DEF456");
+        // ✅ USAR LA SESIÓN DE VAADIN en lugar de Spring Security Context
+        String userEmail = (String) VaadinSession.getCurrent().getAttribute("userEmail");
+        String authToken = (String) VaadinSession.getCurrent().getAttribute("authToken");
+
+        logger.info("Email desde sesión Vaadin: {}", userEmail);
+        logger.info("Token presente: {}", authToken != null ? "Sí" : "No");
+
+        try {
+            // Obtener el ID del usuario actual usando el método helper
+            Long userId = userService.getCurrentUserId();
+
+            if (userId != null) {
+
+                List<BikeForPhotoDTO> userBikes = bikeRepository.findSummariesByUserId(userId);
+
+                if (userBikes.isEmpty()) {
+                    //bikeSelect.setItems("No tienes bicicletas registradas");
+                    bikeSelect.setEnabled(false);
+                    Notification.show("ℹ️ Primero debes registrar una bicicleta para poder subir fotos.");
+                } else {
+                    // Opción 1: Mostrar texto, guardar BikeSummaryDTO
+                    bikeSelect.setItems(userBikes);
+                    bikeSelect.setItemLabelGenerator(BikeForPhotoDTO::getDisplayLabel);
+                }
+            } else {
+                Notification.show("❌ No hay sesión activa. Por favor, inicia sesión.");
+                getUI().ifPresent(ui -> ui.navigate("login"));
+            }
+        } catch (Exception e) {
+            logger.error("Error al cargar las bicicletas del usuario", e);
+            Notification.show("❌ Error al cargar las bicicletas: " + e.getMessage());
+        }
 
         add(bikeSelect);
     }
@@ -222,7 +263,7 @@ public class PhotoUploadView extends VerticalLayout {
 
             // TODO: Aquí deberías obtener el bikeId real basado en la selección
             // Por ahora usamos un ID simulado
-            String selectedBike = bikeSelect.getValue();
+            //String selectedBike = bikeSelect.getValue();
 
             PhotoExif photoExif = photoExifService.extractAndSaveExif(
                     "uploaded", currentFileName, currentFileData);

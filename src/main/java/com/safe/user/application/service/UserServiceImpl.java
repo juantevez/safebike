@@ -4,9 +4,12 @@ import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEnt
 import com.safe.user.domain.ports.UserRepositoryPort;
 import com.safe.user.domain.model.User;
 import com.safe.user.infrastructure.port.UserServicePort;
+import com.vaadin.flow.server.VaadinSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -194,6 +197,54 @@ public class UserServiceImpl implements UserServicePort {
         } catch (Exception e) {
             logger.error("Error al registrar usuario con email: {}", email, e);
             throw new RuntimeException("Error al registrar usuario: " + e.getMessage(), e);
+        }
+    }
+
+    // Agregar este método alternativo a tu UserServiceImpl
+    public Long getCurrentUserIdFromSession() {
+        try {
+            // Obtener desde la sesión de Vaadin
+            if (VaadinSession.getCurrent() != null) {
+                String userEmail = (String) VaadinSession.getCurrent().getAttribute("userEmail");
+
+                if (userEmail != null) {
+                    User currentUser = findByEmail(userEmail);
+                    return currentUser != null ? currentUser.getId() : null;
+                }
+            }
+
+            return null;
+        } catch (Exception e) {
+            logger.error("Error al obtener el usuario actual desde sesión Vaadin", e);
+            return null;
+        }
+    }
+
+    // Método mejorado que intenta ambos enfoques
+    public Long getCurrentUserId() {
+        try {
+            // Primero intentar desde Vaadin Session
+            Long userIdFromSession = getCurrentUserIdFromSession();
+            if (userIdFromSession != null) {
+                return userIdFromSession;
+            }
+
+            // Si falla, intentar desde Spring Security Context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            logger.info("getCurrentUser");
+            logger.info("authentication: " + (authentication != null ? authentication.getName() : "null"));
+
+            if (authentication != null && authentication.isAuthenticated()
+                    && !authentication.getName().equals("anonymousUser")) {
+                String userEmail = authentication.getName();
+                User currentUser = findByEmail(userEmail);
+                return currentUser != null ? currentUser.getId() : null;
+            }
+
+            return null;
+        } catch (Exception e) {
+            logger.error("Error al obtener el usuario actual", e);
+            return null;
         }
     }
 }

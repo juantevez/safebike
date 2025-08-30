@@ -20,6 +20,7 @@ public class BikeForPhotoDTO {
     public String getSerialNumber() { return serialNumber; }
 
     public String getDisplayLabel() {
-        return brandName + " - " + modelName;
+        return String.format("%s %s - Serial: %s", brandName, modelName, serialNumber.toUpperCase());
     }
+
 }
