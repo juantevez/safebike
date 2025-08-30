@@ -16,8 +16,9 @@ public class PhotoLoadingConfig {
     public PhotoExifServicePort photoExifService(
             ExifAdapter exifAdapter,
             PhotoExifRepositoryPort exifRepositoryPort,
-            PhotoFileRepositoryPort fileRepositoryPort
+            PhotoFileRepositoryPort photoFileRepositoryPort
     ) {
-        return new PhotoExifService(exifAdapter, exifRepositoryPort, fileRepositoryPort);
+        return new PhotoExifService(exifAdapter, exifRepositoryPort, photoFileRepositoryPort);
     }
+
 }

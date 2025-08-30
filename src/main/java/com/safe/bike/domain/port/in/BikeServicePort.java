@@ -1,5 +1,6 @@
 package com.safe.bike.domain.port.in;
 
+import com.safe.bike.domain.model.dto.BikeForPhotoDTO;
 import com.safe.bike.domain.model.entity.BikeEntity;
 import com.safe.bike.domain.model.entity.BrandEntity;
 
@@ -13,4 +14,6 @@ public interface BikeServicePort {
     Optional<BikeEntity> getBikesByBrand(Long brand); // Agregar este método
     // Agregar este método
     List<BikeEntity> getBikesByUserId(Long userId);
+
+    List<BikeForPhotoDTO> getBikesForPhotoUpload(Long userId);
 }

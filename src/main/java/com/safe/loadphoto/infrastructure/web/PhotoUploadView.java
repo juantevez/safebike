@@ -1,15 +1,14 @@
 package com.safe.loadphoto.infrastructure.web;
 
-import com.safe.bike.domain.model.entity.BikeEntity;
-import com.safe.bike.domain.port.in.BikeServicePort;
+
 import com.safe.loadphoto.domain.model.PhotoExif;
 import com.safe.loadphoto.domain.port.in.PhotoExifServicePort;
-import com.safe.user.domain.model.User;
-import com.safe.user.infrastructure.adapters.input.security.SecurityService;
-import com.safe.user.infrastructure.adapters.output.persistence.repositories.UserRepositoryAdapter;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -18,31 +17,23 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.List;
 
 @Route("photo-upload")
 @PageTitle("Subir Fotografías de Bicicleta")
-public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserver {
+public class PhotoUploadView extends VerticalLayout {
 
-    private static final Logger logger = LoggerFactory.getLogger(PhotoUploadView.class);
     private final PhotoExifServicePort photoExifService;
-    private final BikeServicePort bikeService; // Servicio para obtener bicicletas
-    private final SecurityService securityService; // Servicio de seguridad para obtener usuario actual
 
     private Upload upload;
     private MemoryBuffer buffer;
     private Button processButton;
-    private Select<BikeEntity> bikeSelect; // Cambiar a Select<Bike> en lugar de String
+    private Select<String> bikeSelect;
     private TextField fileNameField;
 
     // Contenedores para mostrar resultados
@@ -52,45 +43,14 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
     // Datos temporales
     private byte[] currentFileData;
     private String currentFileName;
-    private User currentUser; // Usuario actual
 
-    public PhotoUploadView(PhotoExifServicePort photoExifService,
-                           BikeServicePort bikeService,
-                           SecurityService securityService) {
+    public PhotoUploadView(PhotoExifServicePort photoExifService) {
         this.photoExifService = photoExifService;
-        this.bikeService = bikeService;
-        this.securityService = securityService;
 
         setSizeFull();
         setPadding(true);
         setSpacing(true);
-    }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        logger.info("beforeEnter");
-        // Obtener el usuario actual
-        currentUser = securityService.getAuthenticatedUser();
-
-        // Verificar PRIMERO si currentUser es null
-        if (currentUser == null) {
-            logger.info("No authenticated user found, redirecting to login");
-            // Redirigir al login si no hay usuario autenticado
-            event.forwardTo("login");
-            return;
-        }
-
-        // Solo loggear si currentUser NO es null
-        logger.info("currentUser EMAIL: {}", currentUser.getEmail());
-        logger.info("currentUser ID: {}", currentUser.getId());
-
-        // Inicializar la vista después de confirmar que hay usuario
-        initializeView();
-        loadUserBikes();
-    }
-
-    private void initializeView() {
-        logger.info("initializeView");
         createHeader();
         createBikeSelector();
         createUploadArea();
@@ -100,17 +60,9 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
     }
 
     private void createHeader() {
-        logger.info("createHeader");
         H2 title = new H2("📸 Subir Fotografías de Bicicleta");
         title.getStyle().set("margin-bottom", "20px");
         add(title);
-
-        // Mostrar usuario actual
-        Span userInfo = new Span("👤 Usuario: " + currentUser.getUsername());
-        userInfo.getStyle().set("color", "var(--lumo-primary-text-color)")
-                .set("font-weight", "500")
-                .set("margin-bottom", "10px");
-        add(userInfo);
 
         Paragraph description = new Paragraph(
                 "Selecciona una bicicleta y sube fotografías. El sistema extraerá automáticamente " +
@@ -126,76 +78,13 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
         bikeSelect.setPlaceholder("Elige la bicicleta para asociar las fotos");
         bikeSelect.setWidthFull();
 
-        // Configurar cómo mostrar las bicicletas en el selector
-        bikeSelect.setItemLabelGenerator(bikeEntity -> {
-            StringBuilder label = new StringBuilder();
-
-            if (bikeEntity.getBrand() != null) {
-                label.append(bikeEntity.getBrand().getName());
-            }
-
-            if (bikeEntity.getBikeModel() != null) {
-                if (label.length() > 0) label.append(" ");
-                label.append(bikeEntity.getBikeModel().getModelName());
-            }
-
-            if (bikeEntity.getBikeType() != null) {
-                label.append(" (").append(bikeEntity.getBikeType().getName()).append(")");
-            }
-
-            if (bikeEntity.getSerialNumber() != null && !bikeEntity.getSerialNumber().isEmpty()) {
-                label.append(" - Serial: ").append(bikeEntity.getSerialNumber());
-            }
-
-            return label.toString();
-        });
+        // TODO: Cargar las bicicletas del usuario actual desde el servicio
+        // Por ahora simulamos con datos de ejemplo
+        bikeSelect.setItems("Trek Mountain Bike - Serial: ABC123",
+                "Giant Road Bike - Serial: XYZ789",
+                "Specialized BMX - Serial: DEF456");
 
         add(bikeSelect);
-    }
-
-    private void loadUserBikes() {
-        logger.info("loadUserBikes");
-        try {
-            // Cargar las bicicletas del usuario actual directamente como entities
-            List<BikeEntity> userBikes = bikeService.getBikesByUserId(currentUser.getId());
-            logger.info("BikeEntity tamano: ", userBikes.size());
-            logger.info("BikeEntity getBikeId: ", userBikes.get(0).getBikeId());
-            logger.info("BikeEntity getBikeId: ", userBikes.get(0).getBikeModel());
-            if (userBikes.isEmpty()) {
-                // Mostrar mensaje si no hay bicicletas registradas
-                Notification notification = Notification.show(
-                        "ℹ️ No tienes bicicletas registradas. Registra una bicicleta primero.",
-                        5000,
-                        Notification.Position.MIDDLE
-                );
-                notification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
-
-                // Opcional: Agregar botón para ir a registrar bicicleta
-                Button registerButton = new Button("➕ Registrar Bicicleta",
-                        event -> getUI().ifPresent(ui -> ui.navigate("bike-register")));
-                registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-                add(registerButton);
-
-                // Deshabilitar el selector
-                bikeSelect.setEnabled(false);
-            } else {
-                // Cargar las bicicletas en el selector
-                bikeSelect.setItems(userBikes);
-                bikeSelect.setEnabled(true);
-
-                // Mostrar cuántas bicicletas se cargaron
-                Notification.show(
-                        "✅ Se cargaron " + userBikes.size() + " bicicleta(s) registradas",
-                        3000,
-                        Notification.Position.BOTTOM_END
-                ).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            }
-
-        } catch (Exception e) {
-            Notification.show("❌ Error al cargar las bicicletas: " + e.getMessage())
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            bikeSelect.setEnabled(false);
-        }
     }
 
     private void createUploadArea() {
@@ -204,7 +93,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
 
         upload.setAcceptedFileTypes("image/jpeg", "image/jpg", "image/png");
         upload.setMaxFiles(1);
-        upload.setMaxFileSize(50 * 1024 * 1024); // 50MB
+        upload.setMaxFileSize(50 * 1024 * 1024); // 50MB - debe coincidir con la config
 
         upload.setUploadButton(new Button("📁 Seleccionar Imagen"));
         upload.setDropLabel(new Paragraph("Arrastra tu imagen aquí o (máximo 50MB)"));
@@ -217,6 +106,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
                 showPreview();
                 processButton.setEnabled(bikeSelect.getValue() != null);
 
+                // Mostrar tamaño del archivo
                 String fileSize = formatFileSize(currentFileData.length);
                 Notification.show("✅ Imagen cargada: " + currentFileName + " (" + fileSize + ")")
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -229,6 +119,8 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
 
         upload.addFileRejectedListener(event -> {
             String errorMessage = event.getErrorMessage();
+
+            // Personalizar mensajes de error
             if (errorMessage.contains("size")) {
                 Notification.show("❌ Archivo demasiado grande. Máximo permitido: 50MB")
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -257,6 +149,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
         add(uploadSection);
     }
 
+    // Método helper para formatear tamaño de archivo
     private String formatFileSize(long bytes) {
         if (bytes < 1024) return bytes + " B";
         int exp = (int) (Math.log(bytes) / Math.log(1024));
@@ -270,6 +163,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
         processButton.setEnabled(false);
         processButton.setWidthFull();
 
+        // Habilitar solo cuando hay archivo y bicicleta seleccionada
         bikeSelect.addValueChangeListener(event ->
                 processButton.setEnabled(currentFileData != null && event.getValue() != null));
 
@@ -326,17 +220,19 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
             processButton.setEnabled(false);
             processButton.setText("⏳ Procesando...");
 
-            BikeEntity selectedBike = bikeSelect.getValue();
+            // TODO: Aquí deberías obtener el bikeId real basado en la selección
+            // Por ahora usamos un ID simulado
+            String selectedBike = bikeSelect.getValue();
 
             PhotoExif photoExif = photoExifService.extractAndSaveExif(
-                    selectedBike.getBikeId().toString(), currentFileName, currentFileData);
+                    "uploaded", currentFileName, currentFileData);
 
             if (photoExif != null) {
                 showExifData(photoExif);
-                Notification.show("🎉 ¡Imagen procesada y guardada exitosamente para " +
-                                selectedBike.getBrand() + " " + selectedBike.getBikeModel() + "!")
+                Notification.show("🎉 ¡Imagen procesada y guardada exitosamente!")
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
+                // Resetear formulario
                 resetForm();
             } else {
                 Notification.show("❌ Error al procesar la imagen")
@@ -358,6 +254,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
         H2 exifTitle = new H2("📊 Datos EXIF Extraídos");
         exifContainer.add(exifTitle);
 
+        // Información de la cámara
         if (exif.getCameraMaker() != null || exif.getCameraModel() != null) {
             VerticalLayout cameraInfo = new VerticalLayout();
             cameraInfo.setPadding(false);
@@ -373,10 +270,12 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
             exifContainer.add(cameraInfo);
         }
 
+        // Fecha y hora
         if (exif.getDateTime() != null) {
             exifContainer.add(createInfoField("📅 Fecha/Hora:", exif.getDateTime()));
         }
 
+        // Ubicación GPS
         if (exif.getLatitude() != null && exif.getLongitude() != null) {
             HorizontalLayout gpsLayout = new HorizontalLayout();
             gpsLayout.add(
@@ -385,6 +284,7 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
             );
             exifContainer.add(gpsLayout);
 
+            // TODO: Aquí podrías agregar un mapa pequeño o enlace a Google Maps
             Button mapButton = new Button("🗺️ Ver en Mapa",
                     event -> openMap(exif.getLatitude(), exif.getLongitude()));
             mapButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -428,6 +328,8 @@ public class PhotoUploadView extends VerticalLayout implements BeforeEnterObserv
         previewContainer.setVisible(false);
         exifContainer.setVisible(false);
         processButton.setEnabled(false);
+
+        // Resetear el componente upload
         upload.clearFileList();
     }
 }
