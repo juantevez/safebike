@@ -11,7 +11,7 @@ import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "register", layout = MainLayout.class)
+@Route(value = "/register", layout = MainLayout.class)
 public class RegisterView extends VerticalLayout {
 
     private final UserServiceImpl userService;

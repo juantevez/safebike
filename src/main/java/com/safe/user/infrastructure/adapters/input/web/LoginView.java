@@ -19,7 +19,7 @@ import com.vaadin.flow.router.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Route(value = "login", layout = MainLayout.class)
+@Route(value = "/login", layout = MainLayout.class)
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginView.class);
@@ -226,16 +226,42 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
             getUI().ifPresent(ui -> ui.navigate("photo-upload"));
         });
 
-        // Layout para los botones - CAMBIO A VERTICAL
+// Botón para generar reporte - ICONO CORREGIDO
+        Button reportButton = new Button("📊 Generar Reporte");
+        reportButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_LARGE);
+        reportButton.setWidth("320px");
+        reportButton.setHeight("100px");
+        reportButton.getStyle()
+                .set("font-size", "18px")
+                .set("margin", "10px")
+                .set("padding", "20px")
+                .set("line-height", "1.2")
+                .set("display", "flex")
+                .set("align-items", "center")
+                .set("justify-content", "center")
+                .set("white-space", "normal")
+                .set("text-overflow", "visible")
+                .set("overflow", "visible")
+                .set("word-wrap", "break-word")
+                .set("box-sizing", "border-box")
+                .set("-webkit-appearance", "none")
+                .set("border-radius", "8px");
+
+        reportButton.addClickListener(event -> {
+            getUI().ifPresent(ui -> ui.navigate("reports"));
+        });
+
+// Layout para los botones - TODOS LOS BOTONES INCLUIDOS
         VerticalLayout buttonLayout = new VerticalLayout();
         buttonLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         buttonLayout.setSpacing(true);
         buttonLayout.setWidth("100%");
         buttonLayout.getStyle()
-                .set("gap", "20px")  // Espacio entre botones
-                .set("padding", "20px 0");  // Padding arriba y abajo
+                .set("gap", "20px")
+                .set("padding", "20px 0");
 
-        buttonLayout.add(bikeButton, photoButton);
+// AGREGAR TODOS LOS BOTONES AL LAYOUT
+        buttonLayout.add(bikeButton, photoButton, reportButton);
 
         // Botón de logout
         Button logoutButton = new Button("🚪 Cerrar Sesión");

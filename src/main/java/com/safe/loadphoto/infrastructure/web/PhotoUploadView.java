@@ -2,7 +2,7 @@ package com.safe.loadphoto.infrastructure.web;
 
 
 import com.safe.bike.domain.model.dto.BikeForPhotoDTO;
-import com.safe.bike.infrastructure.persistence.bike.BikeRepository;
+import com.safe.bike.infrastructure.persistence.bike.BikeJpaRepository;
 import com.safe.loadphoto.domain.model.PhotoExif;
 import com.safe.loadphoto.domain.port.in.PhotoExifServicePort;
 import com.safe.user.application.service.UserServiceImpl;
@@ -52,12 +52,12 @@ public class PhotoUploadView extends VerticalLayout {
     private byte[] currentFileData;
     private String currentFileName;
 
-    BikeRepository bikeRepository;
+    BikeJpaRepository bikeJpaRepository;
     UserServiceImpl userService;
 
-    public PhotoUploadView(PhotoExifServicePort photoExifService, UserServiceImpl userService, BikeRepository bikeRepository) {
+    public PhotoUploadView(PhotoExifServicePort photoExifService, UserServiceImpl userService, BikeJpaRepository bikeJpaRepository) {
         this.photoExifService = photoExifService;
-        this.bikeRepository = bikeRepository;
+        this.bikeJpaRepository = bikeJpaRepository;
         this.userService  = userService;
 
         setSizeFull();
@@ -105,7 +105,7 @@ public class PhotoUploadView extends VerticalLayout {
 
             if (userId != null) {
 
-                List<BikeForPhotoDTO> userBikes = bikeRepository.findSummariesByUserId(userId);
+                List<BikeForPhotoDTO> userBikes = bikeJpaRepository.findSummariesByUserId(userId);
 
                 if (userBikes.isEmpty()) {
                     //bikeSelect.setItems("No tienes bicicletas registradas");

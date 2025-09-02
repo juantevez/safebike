@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BikeRepository extends JpaRepository<BikeEntity, Long> {
+public interface BikeJpaRepository extends JpaRepository<BikeEntity, Long> {
 
     @EntityGraph(attributePaths = {
             "brand",
@@ -49,5 +49,18 @@ public interface BikeRepository extends JpaRepository<BikeEntity, Long> {
         """)
     List<BikeForPhotoDTO> findSummariesByUserId(@Param("userId") Long userId);
 
+    @Query("""
+        SELECT b FROM BikeEntity b 
+        JOIN FETCH b.user u 
+        LEFT JOIN FETCH b.brand br 
+        LEFT JOIN FETCH b.bikeType bt 
+        LEFT JOIN FETCH b.bikeModel bm 
+        LEFT JOIN FETCH b.sizeBike s
+        ORDER BY u.lastName, u.firstName, b.bikeId
+        """)
+    List<BikeEntity> findAllBikesWithUserInfo();
+
+    @Query("SELECT COUNT(DISTINCT b.user.id) FROM BikeEntity b")
+    int countDistinctUsers();
 
 }

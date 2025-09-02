@@ -1,6 +1,7 @@
 package com.safe.bike.domain.model;
 
 import com.safe.user.domain.model.User;
+import lombok.Builder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
  * Domain model representing a Bike
  * This class represents the core business entity for bikes in the domain layer
  */
+@Builder
 public class Bike {
 
         private Long id;
@@ -327,20 +329,20 @@ public class Bike {
         }
 
         public static class Currency {
-                private Long id;
+                private Integer id;
                 private String name;
                 private String symbol;
 
                 public Currency() {}
 
-                public Currency(Long id, String name, String symbol) {
+                public Currency(Integer id, String name, String symbol) {
                         this.id = id;
                         this.name = name;
                         this.symbol = symbol;
                 }
 
-                public Long getId() { return id; }
-                public void setId(Long id) { this.id = id; }
+                public Integer getId() { return id; }
+                public void setId(Integer id) { this.id = id; }
                 public String getName() { return name; }
                 public void setName(String name) { this.name = name; }
                 public String getSymbol() { return symbol; }

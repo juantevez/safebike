@@ -10,13 +10,36 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Route(value = "/")
-public class HomeView extends VerticalLayout {
+public class HomeView extends VerticalLayout implements BeforeEnterObserver {
+    private static final Logger logger = LoggerFactory.getLogger(HomeView.class);
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        // Verificar si el usuario está autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() &&
+                !auth.getName().equals("anonymousUser")) {
+            // Si está autenticado, redirigir a reportes
+            UI.getCurrent().navigate("/reports");
+        } else {
+            // Si no está autenticado, redirigir al login
+            UI.getCurrent().navigate("/login");
+        }
+    }
 
     public HomeView() {
+        logger.info("🏠 HomeView - Constructor iniciado");
+
         // Configurar la vista principal
         setSizeFull();
         setAlignItems(FlexComponent.Alignment.CENTER);
@@ -27,6 +50,8 @@ public class HomeView extends VerticalLayout {
         // Título de la aplicación
         H1 title = new H1(".:SAVING MY BIKE:.");
         title.addClassNames(LumoUtility.FontSize.XXXLARGE, LumoUtility.TextColor.PRIMARY);
+
+        logger.info("🏠 HomeView - Título creado");
 
         // Contenedor para los botones
         HorizontalLayout buttonContainer = new HorizontalLayout();
@@ -39,7 +64,10 @@ public class HomeView extends VerticalLayout {
                 VaadinIcon.SIGN_IN,
                 "INICIAR SESIÓN",
                 "Accede a tu cuenta",
-                () -> UI.getCurrent().navigate("login")
+                () -> {
+                    logger.info("🏠 HomeView - Navegando a login");
+                    UI.getCurrent().navigate("login");
+                }
         );
 
         // Botón de Registro
@@ -47,7 +75,10 @@ public class HomeView extends VerticalLayout {
                 VaadinIcon.USER_CHECK,
                 "REGISTRARSE",
                 "Crea una nueva cuenta",
-                () -> UI.getCurrent().navigate("register")
+                () -> {
+                    logger.info("🏠 HomeView - Navegando a register");
+                    UI.getCurrent().navigate("register");
+                }
         );
 
         // Agregar botones al contenedor
@@ -58,6 +89,8 @@ public class HomeView extends VerticalLayout {
 
         // Estilo adicional para responsive
         addClassName("home-view");
+
+        logger.info("🏠 HomeView - Constructor completado exitosamente");
     }
 
     private Button createMenuButton(VaadinIcon iconType, String text, String description, Runnable action) {

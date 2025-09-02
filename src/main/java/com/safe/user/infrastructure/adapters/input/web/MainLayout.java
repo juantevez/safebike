@@ -8,10 +8,8 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Viewport;
 import com.vaadin.flow.router.RouterLayout;
-import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.server.VaadinSession;
 
 @CssImport("./styles/shared-styles.css")
 public class MainLayout extends VerticalLayout implements RouterLayout, HasStyle {
@@ -25,12 +23,34 @@ public class MainLayout extends VerticalLayout implements RouterLayout, HasStyle
         header.setHeight("60px");
         header.getStyle().set("padding", "0 20px");
 
-        // Título
-        H1 title = new H1("SAVING MY BIKE");
-        header.add(title);
+        // Título con ícono de reportes
+        HorizontalLayout titleSection = new HorizontalLayout();
+        titleSection.setAlignItems(Alignment.CENTER);
 
-        // Botón de modo oscuro (llamamos al método privado)
-        header.add(createDarkModeButton());
+        Icon reportsIcon = VaadinIcon.CHART.create();
+        reportsIcon.getStyle().set("margin-right", "10px");
+        H1 title = new H1("SAVING MY BIKE - REPORTES");
+
+        titleSection.add(reportsIcon, title);
+
+        // Sección derecha con botón de logout
+        HorizontalLayout rightSection = new HorizontalLayout();
+        rightSection.setAlignItems(Alignment.CENTER);
+
+        // Botón de modo oscuro
+        rightSection.add(createDarkModeButton());
+
+        // Botón de logout
+        Button logoutButton = new Button("Cerrar Sesión", VaadinIcon.SIGN_OUT.create());
+        logoutButton.addClickListener(e -> {
+            VaadinSession.getCurrent().getSession().invalidate();
+            getUI().ifPresent(ui -> ui.navigate("/login"));
+        });
+        logoutButton.getStyle().set("margin-left", "10px");
+
+        rightSection.add(logoutButton);
+
+        header.add(titleSection, rightSection);
 
         // Añadir el header al layout principal
         add(header);

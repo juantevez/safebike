@@ -1,16 +1,16 @@
 package com.safe.bike.config;
 
-import com.safe.bike.infrastructure.persistence.bike.BikeRepository;
+import com.safe.bike.infrastructure.persistence.bike.BikeJpaRepository;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DatabaseConfig {
 
-    private final BikeRepository bikeRepository;
+    private final BikeJpaRepository bikeJpaRepository;
 
 
-    public DatabaseConfig(BikeRepository bikeRepository) {
-        this.bikeRepository = bikeRepository;
+    public DatabaseConfig(BikeJpaRepository bikeJpaRepository) {
+        this.bikeJpaRepository = bikeJpaRepository;
     }
 
 }

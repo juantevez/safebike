@@ -26,33 +26,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        // Rutas públicas
+                        // ✅ PERMITIR estas rutas SIN autenticación
                         .requestMatchers("/", "/login", "/register").permitAll()
-                        // Recursos estáticos de Vaadin
-                        .requestMatchers("/VAADIN/**", "/frontend/**", "/images/**",
-                                "/manifest.json", "/sw.js", "/favicon.ico").permitAll()
-                        // Rutas que requieren autenticación
-                        .requestMatchers("/bike-form/**", "/photo-upload/**").authenticated()
-                        // Cualquier otra ruta requiere autenticación
+                        // ✅ PERMITIR recursos estáticos de Vaadin
+                        .requestMatchers("/VAADIN/**", "/vaadinServlet/**", "/frontend/**").permitAll()
+                        // ✅ REQUERIR autenticación para rutas protegidas
+                        .requestMatchers("/bike-form", "/photo-upload", "/reports").authenticated()
+                        // ✅ Por defecto, todo lo demás requiere autenticación
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session
-                        // Usar política de sesión stateless con JWT
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                        .defaultSuccessUrl("/bike-form", true)
-                )
-                // ✅ El filtro se inyecta de forma lazy
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable()) // ✅ Deshabilitar CSRF para simplificar (solo para desarrollo)
+                .httpBasic(httpBasic -> httpBasic.disable()) // ✅ Deshabilitar HTTP Basic Auth
+                .formLogin(form -> form.disable()); // ✅ Deshabilitar el form login automático de Spring
 
         return http.build();
     }

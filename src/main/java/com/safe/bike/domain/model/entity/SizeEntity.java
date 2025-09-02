@@ -14,7 +14,7 @@ public class SizeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "sigla", length = 20, nullable = false)
     private String sigla;
@@ -28,18 +28,18 @@ public class SizeEntity {
     // Constructores
     public SizeEntity() { }
 
-    public SizeEntity(Integer id, String sigla, String description) {
+    public SizeEntity(Long id, String sigla, String description) {
         this.id = id;
         this.sigla = sigla;
         this.description = description;
     }
 
     // Getters y Setters
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
