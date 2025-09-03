@@ -4,7 +4,6 @@ import com.safe.report.domain.port.in.GenerateReportUseCase;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.server.StreamResource;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +12,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BikeReportVaadinService {
 
     private final GenerateReportUseCase generateReportUseCase;
+
+
+    public BikeReportVaadinService (GenerateReportUseCase generateReportUseCase){
+        this.generateReportUseCase = generateReportUseCase;
+    }
 
     /**
      * Genera un reporte PDF de bicicletas y devuelve un StreamResource para Vaadin
@@ -26,30 +29,24 @@ public class BikeReportVaadinService {
     public StreamResource generateBikeReportPdf() {
         try {
             log.info("Generating bike report PDF for Vaadin...");
-
-            byte[] pdfContent = generateReportUseCase.generateBikeReport();
+            byte[] pdfContent = generateReportUseCase.generateBikeReport(); // ✅ Usa el caso de uso
 
             String filename = "reporte_bicicletas_" +
                     LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
 
             StreamResource resource = new StreamResource(filename,
                     () -> new ByteArrayInputStream(pdfContent));
-
             resource.setContentType("application/pdf");
-            resource.setCacheTime(0); // No cachear el archivo
+            resource.setCacheTime(0);
 
-            log.info("Bike report PDF generated successfully for Vaadin download");
-
+            log.info("Bike report PDF generated successfully");
             return resource;
 
         } catch (Exception e) {
             log.error("Error generating bike report PDF for Vaadin", e);
-
-            // Mostrar notificación de error en Vaadin
-            Notification.show("Error al generar el reporte PDF: " + e.getMessage(),
+            Notification.show("Error al generar el reporte: " + e.getMessage(),
                             5000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
-
             throw new RuntimeException("Error al generar el reporte PDF", e);
         }
     }
@@ -73,11 +70,11 @@ public class BikeReportVaadinService {
             log.error("Error generating bike report PDF bytes", e);
 
             // Mostrar notificación de error en Vaadin
-            Notification.show("Error al generar el reporte PDF: " + e.getMessage(),
+            Notification.show("Error al generar el reporte PDF 3 : " + e.getMessage(),
                             5000, Notification.Position.TOP_CENTER)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
 
-            throw new RuntimeException("Error al generar el reporte PDF", e);
+            throw new RuntimeException("Error al generar el reporte PDF 4 ", e);
         }
     }
 

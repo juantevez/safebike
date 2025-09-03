@@ -5,10 +5,14 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.safe.bike.domain.model.Bike;
+import com.safe.bike.domain.model.entity.BikeEntity;
 import com.safe.report.domain.model.BikeReportData;
 import com.safe.report.domain.port.out.PdfGeneratorPort;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
 import java.io.ByteArrayOutputStream;
 import java.time.format.DateTimeFormatter;
 
@@ -16,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class PdfGeneratorAdapter implements PdfGeneratorPort {
 
+    private static final Logger logger = LoggerFactory.getLogger(PdfGeneratorAdapter.class);
     @Override
     public byte[] generateBikeReport(BikeReportData reportData) {
         try {
@@ -35,7 +40,7 @@ public class PdfGeneratorAdapter implements PdfGeneratorPort {
             // Información del reporte
             Font infoFont = new Font(Font.FontFamily.HELVETICA, 12);
             document.add(new Paragraph("Fecha de generación: " + reportData.getReportGeneratedAt(), infoFont));
-            document.add(new Paragraph("Total de usuarios: " + reportData.getTotalUsers(), infoFont));
+            ///document.add(new Paragraph("Total de usuarios: " + reportData.getTotalUsers(), infoFont));
             document.add(new Paragraph("Total de bicicletas: " + reportData.getTotalBikes(), infoFont));
             document.add(Chunk.NEWLINE);
 
@@ -55,17 +60,24 @@ public class PdfGeneratorAdapter implements PdfGeneratorPort {
             table.addCell(new Phrase("Tamaño", headerFont));
             table.addCell(new Phrase("F. Compra", headerFont));
 
+            System.out.println("getBikes() SIZE = " + reportData.getBikes().size());
+            for (BikeEntity bike : reportData.getBikes()) {
+                System.out.println("=========Bikes========");
+                System.out.println("bike.getUser().getEmail())      :  " + bike.getUser().getEmail());
+                System.out.println("bike.getBikeModel().getName())  :  " + bike.getBikeModel().getModelName());
+                System.out.println("bike.getBrand().getName());     :  " + bike.getBrand().getName());
+                System.out.println("=========Bikes========");
+            }
             // Datos
             Font dataFont = new Font(Font.FontFamily.HELVETICA, 9);
-            for (Bike bike : reportData.getBikes()) {
-                //table.addCell(new Phrase(bike.getUserFirstName() + " " + bike.getUserLastName(), dataFont));
+            for (BikeEntity bike : reportData.getBikes()) {
                 table.addCell(new Phrase(bike.getUser().getFirstName() + " " + bike.getUser().getLastName(), dataFont));
                 table.addCell(new Phrase(bike.getUser().getEmail(), dataFont));
                 table.addCell(new Phrase(bike.getBrand().getName(), dataFont));
                 table.addCell(new Phrase(bike.getBikeType().getName(), dataFont));
-                table.addCell(new Phrase(bike.getBikeModel().getName(), dataFont));
+                table.addCell(new Phrase(bike.getBikeModel().getModelName(), dataFont));
                 table.addCell(new Phrase(bike.getSerialNumber(), dataFont));
-                table.addCell(new Phrase(bike.getSize().getName(), dataFont));
+                table.addCell(new Phrase(bike.getSizeBike().getSigla(), dataFont));
                 String purchaseDate = bike.getPurchaseDate() != null ?
                         bike.getPurchaseDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A";
                 table.addCell(new Phrase(purchaseDate, dataFont));
@@ -74,12 +86,12 @@ public class PdfGeneratorAdapter implements PdfGeneratorPort {
             document.add(table);
             document.close();
 
-            log.info("PDF report generated successfully with {} bikes", reportData.getTotalBikes());
+            logger.info("PDF report generated successfully with {} bikes", reportData.getTotalBikes());
             return outputStream.toByteArray();
 
         } catch (DocumentException e) {
-            log.error("Error generating PDF report", e);
-            throw new RuntimeException("Error al generar el reporte PDF", e);
+            logger.error("Error generating PDF report", e);
+            throw new RuntimeException("Error al generar el reporte PDF 5", e);
         }
     }
 }

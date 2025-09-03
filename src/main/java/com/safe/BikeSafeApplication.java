@@ -14,13 +14,16 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.safe.bike.infrastructure.persistence",
         "com.safe.user.infrastructure.adapters.output.persistence.repositories",
         "com.safe.loadphoto.infrastructure.persistence",
-        "com.safe.location.infrastructure.persistence"
+        "com.safe.location.infrastructure.persistence",
+        "com.safe.report.infrastructure.persistence"
 })
 @EntityScan({
-        "com.safe.bike.domain.model.entity",
+        "com.safe.bike.domain.model",
+        "com.safe.bike.domain.model",
         "com.safe.user.infrastructure.adapters.output.persistence.entities",
         "com.safe.loadphoto.domain.model.entity",
-        "com.safe.location.domain.model.entity"
+        "com.safe.location.domain.model.entity",
+        "com.safe.report.domain.model.entity"
 })
 public class BikeSafeApplication {
 

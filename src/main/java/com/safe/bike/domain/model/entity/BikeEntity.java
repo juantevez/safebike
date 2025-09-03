@@ -46,7 +46,7 @@ public class BikeEntity {
     @JoinColumn(name = "size_id")
     private SizeEntity sizeBike;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "moneda_id")
     private MonedaEntity moneda;
     private double purchaseValue;
