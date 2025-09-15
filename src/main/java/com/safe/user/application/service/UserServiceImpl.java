@@ -1,203 +1,285 @@
 package com.safe.user.application.service;
 
-import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
-import com.safe.user.domain.ports.UserRepositoryPort;
 import com.safe.user.domain.model.User;
+import com.safe.user.domain.ports.UserRepository;
 import com.safe.user.infrastructure.port.UserServicePort;
 import com.vaadin.flow.server.VaadinSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Service("userServiceImpl") // ✅ Quitar @Primary, mantener como backup
+@Service("userServiceImpl")
 @Qualifier("original")
+@Transactional
 public class UserServiceImpl implements UserServicePort {
+
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    private final UserRepositoryPort userRepositoryPort;
-    private final PasswordEncoder passwordEncoder;
+    private UserRepository userRepository;
 
-    // Constructor con inyección de dependencias - Solo UserRepositoryPort es necesario
-    public UserServiceImpl(UserRepositoryPort userRepositoryPort, PasswordEncoder passwordEncoder) {
-        this.userRepositoryPort = userRepositoryPort;
+    private PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
-    public List<UserEntity> getAllUsers() {
-        logger.info("Obteniendo todos los usuarios");
+    public UserServiceImpl() {}
 
-        try {
-            List<UserEntity> users = userRepositoryPort.findAll();
-            logger.info("Se encontraron {} usuarios", users.size());
-            logger.debug("Usuarios obtenidos: {}", users);
-            return users;
-        } catch (Exception e) {
-            logger.error("Error al obtener todos los usuarios", e);
-            throw e;
-        }
+    // ✅ IMPLEMENTAR MÉTODOS BÁSICOS CRUD QUE FALTAN
+    @Override
+    public List<User> getAllUsers() {
+        logger.info("Obteniendo todos los usuarios");
+        return userRepository.findAll();
     }
 
     @Override
-    public Optional<UserEntity> getUserById(Long id) {
-        logger.info("Buscando usuario con ID: {}", id);
-
-        if (id == null) {
-            logger.warn("Se intentó buscar un usuario con ID null");
-            return Optional.empty();
-        }
-
-        try {
-            Optional<UserEntity> user = userRepositoryPort.findById(id);
-
-            if (user.isPresent()) {
-                logger.info("Usuario encontrado con ID: {}", id);
-                logger.debug("Detalles del usuario: {}", user.get());
-            } else {
-                logger.warn("No se encontró usuario con ID: {}", id);
-            }
-
-            return user;
-        } catch (Exception e) {
-            logger.error("Error al buscar usuario con ID: {}", id, e);
-            throw e;
-        }
+    public Optional<User> getUserById(Long id) {
+        logger.info("Buscando usuario por ID: {}", id);
+        return userRepository.findById(id);
     }
 
     @Override
     public User save(User user) {
-        logger.info("Guardando usuario");
-
-        if (user == null) {
-            logger.warn("Se intentó guardar un usuario null");
-            throw new IllegalArgumentException("Usuario no puede ser null");
-        }
-
-        try {
-            logger.debug("Datos del usuario a guardar: {}", user);
-            User savedUser = userRepositoryPort.save(user);
-            logger.info("Usuario guardado exitosamente con ID: {}", savedUser.getId());
-            logger.debug("Usuario guardado: {}", savedUser);
-            return savedUser;
-        } catch (Exception e) {
-            logger.error("Error al guardar el usuario: {}", user, e);
-            throw e;
-        }
-    }
-
-    @Override
-    public User findByEmail(String email) {
-        logger.info("Buscando usuario por email: {}", email);
-
-        if (email == null || email.trim().isEmpty()) {
-            logger.warn("Se intentó buscar un usuario con email null o vacío");
-            return null;
-        }
-
-        try {
-            User user = userRepositoryPort.findByEmail(email.toLowerCase());
-
-            if (user != null) {
-                logger.info("Usuario encontrado con email: {}", email);
-                logger.debug("Detalles del usuario: {}", user);
-            } else {
-                logger.warn("No se encontró usuario con email: {}", email);
-            }
-
-            return user; // ✅ CORREGIDO: Retornar el usuario encontrado o null
-        } catch (Exception e) {
-            logger.error("Error al buscar usuario por email: {}", email, e);
-            throw e;
-        }
+        logger.info("Guardando usuario: {}", user.getEmail());
+        return userRepository.save(user);
     }
 
     @Override
     public void deleteById(Long id) {
         logger.info("Eliminando usuario con ID: {}", id);
-
-        if (id == null) {
-            logger.warn("Se intentó eliminar un usuario con ID null");
-            throw new IllegalArgumentException("ID no puede ser null");
-        }
-
-        try {
-            // Verificar si existe antes de eliminar
-            Optional<UserEntity> existingUser = userRepositoryPort.findById(id);
-            if (existingUser.isPresent()) {
-                userRepositoryPort.deleteById(id);
-                logger.info("Usuario eliminado exitosamente con ID: {}", id);
-            } else {
-                logger.warn("No se puede eliminar: Usuario con ID {} no existe", id);
-                throw new IllegalArgumentException("Usuario con ID " + id + " no existe");
-            }
-        } catch (Exception e) {
-            logger.error("Error al eliminar usuario con ID: {}", id, e);
-            throw e;
-        }
+        userRepository.deleteById(id);
     }
 
     @Override
-    public User registrarUsuario(String email, String password, String firstName, String lastName, String userName) {
-        logger.info("Registrando nuevo usuario: {}", email);
+    public User findByEmail(String email) {
+        logger.info("Buscando usuario por email: {}", email);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+    }
 
-        // Validaciones de entrada
+    @Override
+    public User findByUsername(String username) {
+        logger.info("Buscando usuario por username: {}", username);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con username: " + username));
+    }
+
+    @Override
+    public User findById(Long id) {
+        logger.info("Buscando usuario por ID: {}", id);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+    }
+
+    @Override
+    public User registrarUsuario(String email, String password, String firstName, String lastName, String username) {
+        logger.info("Registrando usuario: {}", email);
+
+        // Validaciones
+        validarDatosUsuario(email, password, firstName, lastName, username);
+
+        // Verificar si ya existe
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Ya existe un usuario con el email: " + email);
+        }
+
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Ya existe un usuario con el username: " + username);
+        }
+
+        // Crear usuario
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        user.setRole("USER");
+        user.setCreatedAt(LocalDateTime.now());
+
+        // Datos geográficos null
+        user.setProvinciaId(null);
+        user.setMunicipioId(null);
+        user.setLocalidadId(null);
+
+        User savedUser = userRepository.save(user);
+        logger.info("Usuario registrado exitosamente con ID: {}", savedUser.getId());
+
+        return savedUser;
+    }
+
+    @Override
+    public User registrarUsuarioConDatosGeograficos(
+            String email,
+            String password,
+            String firstName,
+            String lastName,
+            String username,
+            Integer provinciaId,
+            Integer municipioId,
+            Integer localidadId) {
+
+        logger.info("Registrando usuario con datos geográficos: {}", email);
+
+        // Validaciones básicas
+        validarDatosUsuario(email, password, firstName, lastName, username);
+
+        // Validaciones geográficas opcionales
+        validarDatosGeograficos(provinciaId, municipioId, localidadId);
+
+        // Verificar si ya existe
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Ya existe un usuario con el email: " + email);
+        }
+
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Ya existe un usuario con el username: " + username);
+        }
+
+        // Crear usuario
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        user.setRole("USER");
+        user.setCreatedAt(LocalDateTime.now());
+
+        // Asignar datos geográficos
+        user.setProvinciaId(provinciaId);
+        user.setMunicipioId(municipioId);
+        user.setLocalidadId(localidadId);
+
+        User savedUser = userRepository.save(user);
+
+        logger.info("Usuario registrado exitosamente con ID: {} - Provincia: {}, Municipio: {}, Localidad: {}",
+                savedUser.getId(), provinciaId, municipioId, localidadId);
+
+        return savedUser;
+    }
+
+    @Override
+    public User actualizarDatosGeograficos(Long userId, Integer provinciaId, Integer municipioId, Integer localidadId) {
+        logger.info("Actualizando datos geográficos para usuario ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+
+        // Validar datos geográficos
+        validarDatosGeograficos(provinciaId, municipioId, localidadId);
+
+        // Actualizar
+        user.setProvinciaId(provinciaId);
+        user.setMunicipioId(municipioId);
+        user.setLocalidadId(localidadId);
+
+        User updatedUser = userRepository.save(user);
+        logger.info("Datos geográficos actualizados exitosamente para usuario ID: {}", userId);
+
+        return updatedUser;
+    }
+
+    @Override
+    public List<User> findUsersByProvincia(Integer provinciaId) {
+        logger.info("Buscando usuarios por provincia ID: {}", provinciaId);
+
+        if (provinciaId == null) {
+            return Collections.emptyList();
+        }
+
+        return userRepository.findByProvinciaId(provinciaId);
+    }
+
+    @Override
+    public List<User> findUsersByMunicipio(Integer municipioId) {
+        logger.info("Buscando usuarios por municipio ID: {}", municipioId);
+
+        if (municipioId == null) {
+            return Collections.emptyList();
+        }
+
+        return userRepository.findByMunicipioId(municipioId);
+    }
+
+    @Override
+    public List<User> findUsersByLocalidad(Integer localidadId) {
+        logger.info("Buscando usuarios por localidad ID: {}", localidadId);
+
+        if (localidadId == null) {
+            return Collections.emptyList();
+        }
+
+        return userRepository.findByLocalidadId(localidadId);
+    }
+
+
+
+    // ✅ MÉTODOS PRIVADOS DE VALIDACIÓN (ya los tienes)
+    private void validarDatosUsuario(String email, String password, String firstName, String lastName, String username) {
         if (email == null || email.trim().isEmpty()) {
-            logger.warn("Intento de registro con email vacío");
-            throw new IllegalArgumentException("Email es requerido");
+            throw new IllegalArgumentException("El email es obligatorio");
+        }
+
+        if (!email.contains("@")) {
+            throw new IllegalArgumentException("El email debe tener un formato válido");
         }
 
         if (password == null || password.trim().isEmpty()) {
-            logger.warn("Intento de registro con password vacío");
-            throw new IllegalArgumentException("Password es requerido");
+            throw new IllegalArgumentException("La contraseña es obligatoria");
+        }
+
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
         }
 
         if (firstName == null || firstName.trim().isEmpty()) {
-            logger.warn("Intento de registro con firstName vacío");
-            throw new IllegalArgumentException("Nombre es requerido");
+            throw new IllegalArgumentException("El nombre es obligatorio");
         }
 
         if (lastName == null || lastName.trim().isEmpty()) {
-            logger.warn("Intento de registro con lastName vacío");
-            throw new IllegalArgumentException("Apellido es requerido");
+            throw new IllegalArgumentException("El apellido es obligatorio");
         }
 
-        try {
-            // Verificar si el usuario ya existe
-            User existingUser = userRepositoryPort.findByEmail(email.toLowerCase());
-            if (existingUser != null) {  // ✅ CORREGIDO: Verificar null correctamente
-                logger.warn("Intento de registro con email ya existente: {}", email);
-                throw new IllegalArgumentException("Ya existe un usuario con el email: " + email);
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("El username es obligatorio");
+        }
+
+        if (username.length() < 3) {
+            throw new IllegalArgumentException("El username debe tener al menos 3 caracteres");
+        }
+    }
+
+    private void validarDatosGeograficos(Integer provinciaId, Integer municipioId, Integer localidadId) {
+        // Si hay municipio, debe haber provincia
+        if (municipioId != null && provinciaId == null) {
+            throw new IllegalArgumentException("Si seleccionas un municipio, debes seleccionar una provincia");
+        }
+
+        // Si hay localidad, debe haber municipio y provincia
+        if (localidadId != null) {
+            if (municipioId == null) {
+                throw new IllegalArgumentException("Si seleccionas una localidad, debes seleccionar un municipio");
             }
-            String hashedPassword = passwordEncoder.encode(password);
-            // Crear nuevo usuario
-            User newUser = new User();
-            newUser.setEmail(email.trim().toLowerCase());
-            newUser.setFirstName(firstName.trim());
-            newUser.setLastName(lastName.trim());
-            newUser.setUsername(userName != null ? userName.trim() : email.trim());
-            newUser.setPassword(hashedPassword); // En producción: hashear la contraseña
-
-            logger.debug("Datos del nuevo usuario a registrar: email={}, firstName={}, lastName={}, username={}",
-                    newUser.getEmail(), newUser.getFirstName(), newUser.getLastName(), newUser.getUsername());
-
-            // Guardar usuario
-            User savedUser = userRepositoryPort.save(newUser);
-            logger.info("Usuario registrado exitosamente con ID: {} y email: {}",
-                    savedUser.getId(), savedUser.getEmail());
-
-            return savedUser;
-
-        } catch (Exception e) {
-            logger.error("Error al registrar usuario con email: {}", email, e);
-            throw new RuntimeException("Error al registrar usuario: " + e.getMessage(), e);
+            if (provinciaId == null) {
+                throw new IllegalArgumentException("Si seleccionas una localidad, debes seleccionar una provincia");
+            }
         }
+
+        logger.debug("Validación de datos geográficos exitosa - Provincia: {}, Municipio: {}, Localidad: {}",
+                provinciaId, municipioId, localidadId);
     }
 
     // Agregar este método alternativo a tu UserServiceImpl
@@ -248,3 +330,5 @@ public class UserServiceImpl implements UserServicePort {
         }
     }
 }
+
+// ✅ TAMBIÉN NECESITAS ACTUALIZAR TU USER REPOSITORY

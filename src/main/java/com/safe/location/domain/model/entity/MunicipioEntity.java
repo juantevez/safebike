@@ -19,7 +19,7 @@ public class MunicipioEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "municipio_id")
-    private Integer municipioId;
+    private Integer id;
 
     @NotNull
     @Column(name = "provincia_id", nullable = false)
@@ -84,12 +84,12 @@ public class MunicipioEntity {
     }
 
     // Getters y Setters
-    public Integer getMunicipioId() {
-        return municipioId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setMunicipioId(Integer municipioId) {
-        this.municipioId = municipioId;
+    public void setId(Integer municipioId) {
+        this.id = municipioId;
     }
 
     public Integer getProvinciaId() {
@@ -147,7 +147,7 @@ public class MunicipioEntity {
     public void setProvincia(ProvinciaEntity provinciaEntity) {
         this.provinciaEntity = provinciaEntity;
         if (provinciaEntity != null) {
-            this.provinciaId = provinciaEntity.getProvinciaId();
+            this.provinciaId = provinciaEntity.getId();
         }
     }
 
@@ -173,7 +173,7 @@ public class MunicipioEntity {
     @Override
     public String toString() {
         return "MunicipioEntity{" +
-                "municipioId=" + municipioId +
+                "municipioId=" + id +
                 ", nombre='" + nombre + '\'' +
                 ", tipo=" + tipo +
                 ", provinciaId=" + provinciaId +

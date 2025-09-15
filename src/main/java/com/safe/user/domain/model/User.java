@@ -17,6 +17,16 @@ public class User {
     private String password;
     private String firstName;
     private String lastName;
+
+    // ✅ IDs GEOGRÁFICOS
+    private Integer localidadId;
+    private Integer municipioId;
+    private Integer provinciaId;
+
+    // ✅ NOMBRES GEOGRÁFICOS (para mostrar)
+    private String localidadNombre;
+    private String municipioNombre;
+    private String provinciaNombre;
     @Builder.Default
     private String role = "USER"; // valor por defecto
     private LocalDateTime createdAt;
@@ -115,6 +125,54 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Integer getLocalidadId() {
+        return localidadId;
+    }
+
+    public void setLocalidadId(Integer localidadId) {
+        this.localidadId = localidadId;
+    }
+
+    public Integer getMunicipioId() {
+        return municipioId;
+    }
+
+    public void setMunicipioId(Integer municipioId) {
+        this.municipioId = municipioId;
+    }
+
+    public Integer getProvinciaId() {
+        return provinciaId;
+    }
+
+    public void setProvinciaId(Integer provinciaId) {
+        this.provinciaId = provinciaId;
+    }
+
+    public String getLocalidadNombre() {
+        return localidadNombre;
+    }
+
+    public void setLocalidadNombre(String localidadNombre) {
+        this.localidadNombre = localidadNombre;
+    }
+
+    public String getMunicipioNombre() {
+        return municipioNombre;
+    }
+
+    public void setMunicipioNombre(String municipioNombre) {
+        this.municipioNombre = municipioNombre;
+    }
+
+    public String getProvinciaNombre() {
+        return provinciaNombre;
+    }
+
+    public void setProvinciaNombre(String provinciaNombre) {
+        this.provinciaNombre = provinciaNombre;
     }
 
     @Override

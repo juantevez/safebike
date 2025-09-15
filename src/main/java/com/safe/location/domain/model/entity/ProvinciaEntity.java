@@ -17,7 +17,7 @@ public class ProvinciaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "provincia_id")
-    private Integer provinciaId;
+    private Integer id;
 
     @NotBlank
     @Size(max = 100)
@@ -52,12 +52,12 @@ public class ProvinciaEntity {
     }
 
     // Getters y Setters
-    public Integer getProvinciaId() {
-        return provinciaId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setProvinciaId(Integer provinciaId) {
-        this.provinciaId = provinciaId;
+    public void setId(Integer provinciaId) {
+        this.id = provinciaId;
     }
 
     public String getNombre() {
@@ -114,7 +114,7 @@ public class ProvinciaEntity {
     @Override
     public String toString() {
         return "ProvinciaEntity{" +
-                "provinciaId=" + provinciaId +
+                "provinciaId=" + id +
                 ", nombre='" + nombre + '\'' +
                 ", codigoProvincia='" + codigoProvincia + '\'' +
                 '}';

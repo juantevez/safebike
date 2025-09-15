@@ -22,7 +22,7 @@ public class CreateUserUseCase {
     }
 
     public User execute(String emailValue, String passwordValue, String firstName, String lastName, String usernameValue) {
-        logger.debug("Ejecutando CreateUserUseCase para email: {}", emailValue);
+        logger.info("Ejecutando CreateUserUseCase para email: {}", emailValue);
 
         // Validaciones completas
         validateInput(emailValue, passwordValue, firstName, lastName, usernameValue);
@@ -46,6 +46,8 @@ public class CreateUserUseCase {
     }
 
     private void validateInput(String email, String password, String firstName, String lastName, String username) {
+        logger.info("Ejecutando validateInput: {}", email, firstName,lastName, username);
+
         InvalidUserDataException.Builder builder = new InvalidUserDataException.Builder()
                 .withMainMessage("Error en datos de registro");
 
