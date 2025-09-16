@@ -6,6 +6,7 @@ import com.safe.bike.infrastructure.persistence.bike.BikeJpaRepository;
 import com.safe.loadphoto.domain.model.PhotoExif;
 import com.safe.loadphoto.domain.port.in.PhotoExifServicePort;
 import com.safe.user.application.service.UserServiceImpl;
+import com.safe.user.infrastructure.adapters.input.web.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -32,7 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
-@Route("photo-upload")
+@Route(value = "photo-upload" , layout = MainLayout.class)
 @PageTitle("Subir Fotografías de Bicicleta")
 public class PhotoUploadView extends VerticalLayout {
     private static final Logger logger = LoggerFactory.getLogger(PhotoUploadView.class);

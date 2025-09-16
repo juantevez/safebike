@@ -4,6 +4,7 @@ package com.safe.report.infrastructure.adapter.input.web;
 import com.safe.BikeSafeApplication;
 import com.safe.report.application.service.BikeReportService;
 import com.safe.report.domain.model.BikeReportDTO;
+import com.safe.user.infrastructure.adapters.input.web.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -28,7 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Route("reports")
+@Route(value = "reports", layout = MainLayout.class)
 @PageTitle("Generador de Reportes de Bicicletas")
 public class ReporteView extends VerticalLayout {
 
