@@ -1,8 +1,8 @@
 package com.safe.user.domain.ports;
 
 
-import com.safe.user.domain.model.User;
-import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
+import com.safe.user.domain.model.entity.User;
+import com.safe.user.domain.model.entity.UserEntity;
 
 import java.util.List;
 import java.util.Optional;

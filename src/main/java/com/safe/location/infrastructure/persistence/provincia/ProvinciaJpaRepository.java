@@ -13,15 +13,12 @@ import java.util.Optional;
 @Repository
 public interface ProvinciaJpaRepository extends JpaRepository<ProvinciaEntity, Integer> {
 
-    // ✅ CORRECTO - Si tu campo se llama "nombre"
+    // Obtener todas las provincias ordenadas por nombre
     List<ProvinciaEntity> findAllByOrderByNombreAsc();
 
-    // ✅ ALTERNATIVA - Usando @Query para ser explícito
-    @Query("SELECT p FROM ProvinciaEntity p ORDER BY p.nombre ASC")
-    List<ProvinciaEntity> getAllProvinciasSorted();
+    // Buscar por nombre (opcional, para validaciones)
+    Optional<ProvinciaEntity> findByNombre(String nombre);
 
-    // ✅ MÉTODOS ADICIONALES QUE PODRÍAS NECESITAR
-    List<ProvinciaEntity> findByNombre(String nombre);
-    List<ProvinciaEntity> findByNombreContaining(String nombre);
-    boolean existsByNombre(String nombre);
+    // Buscar por código (opcional)
+    Optional<ProvinciaEntity> findByCodigoProvincia(String codigoProvincia);
 }

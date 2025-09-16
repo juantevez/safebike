@@ -373,4 +373,6 @@ public class PhotoUploadView extends VerticalLayout {
         // Resetear el componente upload
         upload.clearFileList();
     }
+
+
 }

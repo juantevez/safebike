@@ -1,4 +1,4 @@
-package com.safe.user.domain.model;
+package com.safe.user.domain.model.entity;
 
 
 import lombok.AllArgsConstructor;

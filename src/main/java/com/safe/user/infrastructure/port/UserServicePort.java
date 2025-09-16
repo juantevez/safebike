@@ -1,6 +1,6 @@
 package com.safe.user.infrastructure.port;
 
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.model.entity.User;
 
 import java.util.List;
 import java.util.Optional;

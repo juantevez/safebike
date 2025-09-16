@@ -1,7 +1,7 @@
-package com.safe.user.infrastructure.adapters.output.persistence.repositories;
+package com.safe.user.infrastructure.persistence.repositories;
 
 
-import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
+import com.safe.user.domain.model.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

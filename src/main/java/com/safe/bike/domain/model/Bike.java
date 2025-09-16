@@ -1,6 +1,5 @@
 package com.safe.bike.domain.model;
 
-import com.safe.user.domain.model.User;
 import lombok.Builder;
 
 import java.time.LocalDate;

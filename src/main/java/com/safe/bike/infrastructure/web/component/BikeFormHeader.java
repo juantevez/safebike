@@ -3,7 +3,7 @@ package com.safe.bike.infrastructure.web.component;
 
 import com.safe.bike.infrastructure.web.security.CurrentUserManager;
 import com.safe.user.application.service.AuthService;
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.model.entity.User;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

@@ -1,7 +1,7 @@
-package com.safe.user.infrastructure.adapters.output.persistence.mappers;
+package com.safe.user.infrastructure.persistence.mappers;
 
-import com.safe.user.domain.model.*;
-import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
+import com.safe.user.domain.model.entity.User;
+import com.safe.user.domain.model.entity.UserEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

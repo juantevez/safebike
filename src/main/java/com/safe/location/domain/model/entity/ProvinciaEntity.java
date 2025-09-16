@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "provincias", schema = "public")
+@Table(name = "provincias")
 public class ProvinciaEntity {
 
     @Id

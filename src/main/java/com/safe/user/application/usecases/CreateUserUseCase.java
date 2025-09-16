@@ -1,7 +1,7 @@
 package com.safe.user.application.usecases;
 
 import com.safe.user.domain.exception.InvalidUserDataException;
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.model.entity.User;
 import com.safe.user.domain.ports.UserRepositoryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
