@@ -1,4 +1,4 @@
-package com.safe.user.domain.ports;
+package com.safe.user.infrastructure.persistence.port;
 
 
 import com.safe.user.domain.model.entity.User;

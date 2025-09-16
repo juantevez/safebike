@@ -1,4 +1,4 @@
-package com.safe.user.infrastructure.persistence.repositories;
+package com.safe.user.infrastructure.adapters.output.persistence.repository;
 
 
 import com.safe.user.domain.model.entity.UserEntity;

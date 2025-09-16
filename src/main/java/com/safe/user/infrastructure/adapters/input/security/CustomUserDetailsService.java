@@ -15,15 +15,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserServiceImpl userService;
 
-
     public CustomUserDetailsService(UserServiceImpl userService) {
         this.userService = userService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        //com.safe.user.domain.model.entity.User user = userService.findByEmail(email);
         com.safe.user.domain.model.entity.User user = userService.findByEmail(email);
+
         if (user == null) {
             throw new UsernameNotFoundException("Usuario no encontrado: " + email);
         }

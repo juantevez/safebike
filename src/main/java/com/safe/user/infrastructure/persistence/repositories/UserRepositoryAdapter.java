@@ -1,9 +1,10 @@
 package com.safe.user.infrastructure.persistence.repositories;
 
 import com.safe.user.domain.model.entity.UserEntity;
+import com.safe.user.infrastructure.adapters.output.persistence.repository.UserJpaRepository;
 import com.safe.user.infrastructure.persistence.mappers.UserPersistenceMapper;
 
-import com.safe.user.domain.ports.UserRepositoryPort;
+import com.safe.user.infrastructure.persistence.port.UserRepositoryPort;
 import com.safe.user.domain.model.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

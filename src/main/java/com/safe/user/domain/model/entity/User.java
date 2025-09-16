@@ -1,41 +1,78 @@
 package com.safe.user.domain.model.entity;
 
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Entity
+@Table(name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_email", columnNames = "email"),
+                @UniqueConstraint(name = "uk_user_username", columnNames = "username")
+        })
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
+
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
+
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
+
+    @Column(name = "first_name", nullable = false, length = 50)
     private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
-    // ✅ IDs GEOGRÁFICOS
-    private Integer localidadId;
-    private Integer municipioId;
-    private Integer provinciaId;
-
-    // ✅ NOMBRES GEOGRÁFICOS (para mostrar)
-    private String localidadNombre;
-    private String municipioNombre;
-    private String provinciaNombre;
-    @Builder.Default
+    @Column(name = "role", nullable = false)
     private String role = "USER"; // valor por defecto
+
+    @UpdateTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // Constructor por defecto
-    public User() {
-    }
+    // ✅ RELACIONES GEOGRÁFICAS
+    @Column(name = "provincia_id")
+    private Integer provinciaId;
 
-    // Constructor con parámetros básicos
+    @Column(name = "municipio_id")
+    private Integer municipioId;
+
+    @Column(name = "localidad_id")
+    private Integer localidadId;
+
+    // ✅ NOMBRES GEOGRÁFICOS (campos transient - no se guardan en BD)
+    @Transient
+    private String localidadNombre;
+
+    @Transient
+    private String municipioNombre;
+
+    @Transient
+    private String provinciaNombre;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    // ✅ CONSTRUCTOR CON PARÁMETROS BÁSICOS
     public User(String username, String email, String password, String firstName, String lastName) {
         this();
         this.username = username;
@@ -43,9 +80,10 @@ public class User {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = "USER";
     }
 
-    // Constructor completo
+    // ✅ CONSTRUCTOR COMPLETO
     public User(Long id, String username, String email, String password, String firstName, String lastName, LocalDateTime createdAt) {
         this.id = id;
         this.username = username;
@@ -54,151 +92,124 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.createdAt = createdAt;
+        this.role = "USER";
     }
 
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
 
-    // Métodos de negocio
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // ✅ MÉTODOS DE NEGOCIO
     public String getFullName() {
         return firstName + " " + lastName;
     }
 
-    // Getters y Setters
-    public Long getId() {
-        return id;
+    public String getUbicacionCompleta() {
+        StringBuilder ubicacion = new StringBuilder();
+        if (provinciaNombre != null) {
+            ubicacion.append(provinciaNombre);
+            if (municipioNombre != null) {
+                ubicacion.append(" > ").append(municipioNombre);
+                if (localidadNombre != null) {
+                    ubicacion.append(" > ").append(localidadNombre);
+                }
+            }
+        }
+        return ubicacion.toString();
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // ✅ GETTERS Y SETTERS
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
     public Integer getLocalidadId() {
         return localidadId;
     }
 
-    public void setLocalidadId(Integer localidadId) {
-        this.localidadId = localidadId;
+    public void setLocalidadId(Integer localidad) {
+        this.localidadId = localidad;
     }
 
     public Integer getMunicipioId() {
         return municipioId;
     }
 
-    public void setMunicipioId(Integer municipioId) {
-        this.municipioId = municipioId;
+    public void setMunicipioId(Integer municipio) {
+        this.municipioId = municipio;
     }
 
     public Integer getProvinciaId() {
         return provinciaId;
     }
 
-    public void setProvinciaId(Integer provinciaId) {
-        this.provinciaId = provinciaId;
+    public void setProvinciaId(Integer provincia) {
+        this.provinciaId = provincia;
     }
 
-    public String getLocalidadNombre() {
-        return localidadNombre;
-    }
+    public String getLocalidadNombre() { return localidadNombre; }
+    public void setLocalidadNombre(String localidadNombre) { this.localidadNombre = localidadNombre; }
 
-    public void setLocalidadNombre(String localidadNombre) {
-        this.localidadNombre = localidadNombre;
-    }
+    public String getMunicipioNombre() { return municipioNombre; }
+    public void setMunicipioNombre(String municipioNombre) { this.municipioNombre = municipioNombre; }
 
-    public String getMunicipioNombre() {
-        return municipioNombre;
-    }
+    public String getProvinciaNombre() { return provinciaNombre; }
+    public void setProvinciaNombre(String provinciaNombre) { this.provinciaNombre = provinciaNombre; }
 
-    public void setMunicipioNombre(String municipioNombre) {
-        this.municipioNombre = municipioNombre;
-    }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-    public String getProvinciaNombre() {
-        return provinciaNombre;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setProvinciaNombre(String provinciaNombre) {
-        this.provinciaNombre = provinciaNombre;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
+    // ✅ MÉTODOS ESTÁNDAR
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) &&
-                Objects.equals(email, user.email) &&
-                Objects.equals(username, user.username);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, username);
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", createdAt=" + createdAt +
+                ", role='" + role + '\'' +
                 '}';
     }
 }
