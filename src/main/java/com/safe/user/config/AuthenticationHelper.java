@@ -1,7 +1,7 @@
 package com.safe.user.config;
 
 import com.safe.user.application.service.UserServiceImpl;
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.model.entity.User;
 import com.vaadin.flow.server.VaadinSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -29,7 +29,7 @@ public class MainLayout extends VerticalLayout implements RouterLayout, HasStyle
 
         Icon reportsIcon = VaadinIcon.CHART.create();
         reportsIcon.getStyle().set("margin-right", "10px");
-        H1 title = new H1("SAVING MY BIKE - REPORTES");
+        H1 title = new H1("SAVING MY BIKE");
 
         titleSection.add(reportsIcon, title);
 

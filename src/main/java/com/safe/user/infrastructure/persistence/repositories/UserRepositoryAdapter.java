@@ -1,10 +1,11 @@
-package com.safe.user.infrastructure.adapters.output.persistence.repositories;
+package com.safe.user.infrastructure.persistence.repositories;
 
-import com.safe.user.infrastructure.adapters.output.persistence.entities.UserEntity;
-import com.safe.user.infrastructure.adapters.output.persistence.mappers.UserPersistenceMapper;
+import com.safe.user.domain.model.entity.UserEntity;
+import com.safe.user.infrastructure.adapters.output.persistence.repository.UserJpaRepository;
+import com.safe.user.infrastructure.persistence.mappers.UserPersistenceMapper;
 
-import com.safe.user.domain.ports.UserRepositoryPort;
-import com.safe.user.domain.model.User;
+import com.safe.user.infrastructure.persistence.port.UserRepositoryPort;
+import com.safe.user.domain.model.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;

@@ -1,8 +1,8 @@
 package com.safe.user.application.usecases;
 
 import com.safe.user.domain.exception.InvalidUserDataException;
-import com.safe.user.domain.model.User;
-import com.safe.user.domain.ports.UserRepositoryPort;
+import com.safe.user.domain.model.entity.User;
+import com.safe.user.infrastructure.persistence.port.UserRepositoryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +22,7 @@ public class CreateUserUseCase {
     }
 
     public User execute(String emailValue, String passwordValue, String firstName, String lastName, String usernameValue) {
-        logger.debug("Ejecutando CreateUserUseCase para email: {}", emailValue);
+        logger.info("Ejecutando CreateUserUseCase para email: {}", emailValue);
 
         // Validaciones completas
         validateInput(emailValue, passwordValue, firstName, lastName, usernameValue);
@@ -46,6 +46,8 @@ public class CreateUserUseCase {
     }
 
     private void validateInput(String email, String password, String firstName, String lastName, String username) {
+        logger.info("Ejecutando validateInput: {}", email, firstName,lastName, username);
+
         InvalidUserDataException.Builder builder = new InvalidUserDataException.Builder()
                 .withMainMessage("Error en datos de registro");
 

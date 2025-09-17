@@ -1,6 +1,7 @@
 package com.safe.user.infrastructure.adapters.input.security;
 
 import com.safe.user.application.service.UserServiceImpl;
+import com.safe.user.domain.model.entity.User;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,7 +25,7 @@ public class SecurityService {
      * Obtiene el usuario autenticado actual desde el contexto de Spring Security
      * @return Usuario autenticado o null si no hay usuario autenticado
      */
-    public com.safe.user.domain.model.User getAuthenticatedUser() {
+    public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated() ||

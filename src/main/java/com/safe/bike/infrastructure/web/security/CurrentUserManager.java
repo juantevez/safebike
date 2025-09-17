@@ -1,8 +1,8 @@
 package com.safe.bike.infrastructure.web.security;
 
 import com.safe.user.config.JwtUtil;
-import com.safe.user.infrastructure.port.UserServicePort;
-import com.safe.user.domain.model.User;
+import com.safe.user.domain.model.entity.User;
+import com.safe.user.infrastructure.persistence.port.UserService;
 import com.vaadin.flow.server.VaadinSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +18,9 @@ public class CurrentUserManager {
     private static final Logger logger = LoggerFactory.getLogger(CurrentUserManager.class);
 
     private final JwtUtil jwtUtil;
-    private final UserServicePort userService;
+    private final UserService userService;
 
-    public CurrentUserManager(JwtUtil jwtUtil, UserServicePort userService) {
+    public CurrentUserManager(JwtUtil jwtUtil, UserService userService) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
     }
@@ -33,22 +33,22 @@ public class CurrentUserManager {
             String email = getSessionEmail();
 
             if (token != null && email != null && jwtUtil.validateToken(token, email)) {
-                logger.info("✅ Token válido para: {}", email);
+                logger.info("Token válido para: {}", email);
                 return loadUserFromEmail(email);
             }
 
             // Fallback: Spring Security
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
-                logger.info("✅ Usando usuario de Spring Security: {}", auth.getName());
+                logger.info("Usando usuario de Spring Security: {}", auth.getName());
                 return loadUserFromEmail(auth.getName());
             }
 
-            logger.warn("❌ No se pudo obtener usuario válido");
+            logger.warn("No se pudo obtener usuario válido");
             return Optional.empty();
 
         } catch (Exception e) {
-            logger.error("💥 Error obteniendo usuario actual", e);
+            logger.error("Error obteniendo usuario actual", e);
             return Optional.empty();
         }
     }
@@ -71,10 +71,10 @@ public class CurrentUserManager {
     private Optional<User> loadUserFromEmail(String email) {
         User user = userService.findByEmail(email);
         if (user != null) {
-            logger.info("✅ Usuario cargado: {}", user.getEmail());
+            logger.info("Usuario cargado: {}", user.getEmail());
             return Optional.of(user);
         } else {
-            logger.error("❌ Usuario no encontrado en BD: {}", email);
+            logger.error("Usuario no encontrado en BD: {}", email);
             return Optional.empty();
         }
     }

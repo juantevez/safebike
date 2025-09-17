@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "municipios", schema = "public",
+@Table(name = "municipios",
         uniqueConstraints = @UniqueConstraint(columnNames = {"nombre", "provincia_id"}))
 public class MunicipioEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "municipio_id")
-    private Integer municipioId;
+    private Integer id;
 
     @NotNull
     @Column(name = "provincia_id", nullable = false)
@@ -36,7 +36,7 @@ public class MunicipioEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", length = 20)
-    private TipoMunicipio tipo = TipoMunicipio.MUNICIPIO;
+    private TipoMunicipio tipo = TipoMunicipio.Municipio;
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -51,27 +51,64 @@ public class MunicipioEntity {
             foreignKey = @ForeignKey(name = "fk_municipio_provincia"))
     private ProvinciaEntity provinciaEntity;
 
-    /*@OneToMany(mappedBy = "municipio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<LocalidadEntity> localidades = new ArrayList<>();*/
-
     @OneToMany(mappedBy = "municipioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<LocalidadEntity> localidades = new ArrayList<>();
 
     // Enum para tipos de municipio
     public enum TipoMunicipio {
-        MUNICIPIO("MunicipioEntity"),
-        DEPARTAMENTO("Departamento"),
-        PARTIDO("Partido"),
-        COMUNA("Comuna");
+        Municipio,    // ✅ CAMBIAR A FORMATO DE TU BD
+        Comuna,       // ✅ AGREGAR ESTE VALOR CON MAYÚSCULA INICIAL
+        Ciudad,
+        Villa,
+        Pueblo,
+        Distrito,
+        Canton,
+        Partido,
+        Delegacion,
+        Alcaldia;
 
-        private final String displayName;
-
-        TipoMunicipio(String displayName) {
-            this.displayName = displayName;
+        // ✅ MÉTODO PARA OBTENER DESCRIPCIÓN AMIGABLE
+        public String getDescripcion() {
+            switch (this) {
+                case Municipio: return "Municipio";
+                case Comuna: return "Comuna";
+                case Ciudad: return "Ciudad";
+                case Villa: return "Villa";
+                case Pueblo: return "Pueblo";
+                case Distrito: return "Distrito";
+                case Canton: return "Cantón";
+                case Partido: return "Partido";
+                case Delegacion: return "Delegación";
+                case Alcaldia: return "Alcaldía";
+                default: return this.name();
+            }
         }
 
-        public String getDisplayName() {
-            return displayName;
+        // ✅ MÉTODO PARA OBTENER ENUM DESDE STRING DE FORMA SEGURA
+        public static TipoMunicipio fromString(String valor) {
+            if (valor == null || valor.trim().isEmpty()) {
+                return Municipio; // Valor por defecto
+            }
+
+            try {
+                // Intentar coincidencia exacta primero
+                return TipoMunicipio.valueOf(valor.trim());
+            } catch (IllegalArgumentException e) {
+                // Si no coincide exactamente, intentar case-insensitive
+                for (TipoMunicipio tipo : TipoMunicipio.values()) {
+                    if (tipo.name().equalsIgnoreCase(valor.trim())) {
+                        return tipo;
+                    }
+                }
+                // Si aún no encuentra, usar valor por defecto
+                System.out.println("⚠️ Valor no reconocido para TipoMunicipio: '" + valor + "'. Usando 'Municipio' por defecto.");
+                return Municipio;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return getDescripcion();
         }
     }
 
@@ -84,12 +121,12 @@ public class MunicipioEntity {
     }
 
     // Getters y Setters
-    public Integer getMunicipioId() {
-        return municipioId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setMunicipioId(Integer municipioId) {
-        this.municipioId = municipioId;
+    public void setId(Integer municipioId) {
+        this.id = municipioId;
     }
 
     public Integer getProvinciaId() {
@@ -147,7 +184,7 @@ public class MunicipioEntity {
     public void setProvincia(ProvinciaEntity provinciaEntity) {
         this.provinciaEntity = provinciaEntity;
         if (provinciaEntity != null) {
-            this.provinciaId = provinciaEntity.getProvinciaId();
+            this.provinciaId = provinciaEntity.getId();
         }
     }
 
@@ -173,7 +210,7 @@ public class MunicipioEntity {
     @Override
     public String toString() {
         return "MunicipioEntity{" +
-                "municipioId=" + municipioId +
+                "municipioId=" + id +
                 ", nombre='" + nombre + '\'' +
                 ", tipo=" + tipo +
                 ", provinciaId=" + provinciaId +
