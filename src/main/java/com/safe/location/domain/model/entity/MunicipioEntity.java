@@ -63,7 +63,7 @@ public class MunicipioEntity {
         Pueblo,
         Distrito,
         Canton,
-        Parroquia,
+        Partido,
         Delegacion,
         Alcaldia;
 
@@ -77,7 +77,7 @@ public class MunicipioEntity {
                 case Pueblo: return "Pueblo";
                 case Distrito: return "Distrito";
                 case Canton: return "Cantón";
-                case Parroquia: return "Parroquia";
+                case Partido: return "Partido";
                 case Delegacion: return "Delegación";
                 case Alcaldia: return "Alcaldía";
                 default: return this.name();

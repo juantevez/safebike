@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
             if (provinciaId != null || municipioId != null || localidadId != null) {
                 if (geografiaService != null && !validarJerarquiaGeografica(provinciaId, municipioId, localidadId)) {
-                    throw new IllegalArgumentException("La combinación de Provincia, Municipio y Localidad no es válida");
+                    throw new IllegalArgumentException("La combinación de Provincia, Municipio y Localidad no es válida - 1");
                 }
             }
 
@@ -282,7 +282,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + userId));
 
         if (!validarJerarquiaGeografica(provinciaId, municipioId, localidadId)) {
-            throw new IllegalArgumentException("La combinación de Provincia, Municipio y Localidad no es válida");
+            throw new IllegalArgumentException("La combinación de Provincia, Municipio y Localidad no es válida - 2");
         }
 
         usuario.setProvinciaId(provinciaId);
@@ -626,7 +626,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean validarJerarquiaGeografica(Integer provinciaId, Integer municipioId, Integer localidadId) {
-        if (geografiaService == null) {
+        if (geografiaService == null || provinciaId == 1) {
             return true;
         }
 
