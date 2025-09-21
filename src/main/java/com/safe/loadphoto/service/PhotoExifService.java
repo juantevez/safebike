@@ -33,7 +33,7 @@ public class PhotoExifService implements PhotoExifServicePort {
 
 
     @Override
-    public PhotoExif extractAndSaveExif(String filePath, String fileName, byte[] fileData) {
+    public PhotoExif extractAndSaveExif(String filePath, String fileName, byte[] fileData, Long bikeId) {
         try {
             if (fileData == null || fileData.length == 0) {
                 throw new IllegalArgumentException("File data cannot be null or empty");
@@ -52,7 +52,7 @@ public class PhotoExifService implements PhotoExifServicePort {
             PhotoExif savedExif = exifRepositoryPort.save(photoExif);
 
             // Guarda archivo
-            PhotoFile photoFile = new PhotoFile(UUID.randomUUID().toString(), savedExif.getId(), fileName, fileData);
+            PhotoFile photoFile = new PhotoFile(UUID.randomUUID().toString(), savedExif.getId(), fileName, fileData, bikeId);
             fileRepositoryPort.save(photoFile);
 
             return savedExif;
