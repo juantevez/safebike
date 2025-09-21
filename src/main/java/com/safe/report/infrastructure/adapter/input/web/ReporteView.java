@@ -2,6 +2,7 @@ package com.safe.report.infrastructure.adapter.input.web;
 
 import com.safe.report.application.service.BikeReportService;
 import com.safe.report.domain.model.BikeReportDTO;
+import com.safe.report.domain.usecase.PhotoReportService;
 import com.safe.user.config.AuthenticationHelper;
 import com.safe.user.infrastructure.adapters.input.web.MainLayout;
 import com.vaadin.flow.component.button.Button;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -40,7 +42,7 @@ public class ReporteView extends VerticalLayout implements BeforeEnterObserver {
 
     private final BikeReportService bikeReportService;
     private final AuthenticationHelper authHelper;
-
+    private final PhotoReportService photoReportService;
     private final Button generateButton;
     private final Button previewButton;
     private final Button backButton;
@@ -49,11 +51,12 @@ public class ReporteView extends VerticalLayout implements BeforeEnterObserver {
     private final Paragraph userInfoParagraph;
 
     @Autowired
-    public ReporteView(BikeReportService bikeReportService, AuthenticationHelper authHelper) {
+    public ReporteView(BikeReportService bikeReportService, AuthenticationHelper authHelper, PhotoReportService photoReportService) {
+
         log.info("ReporteView inicializado con BikeReportService: {}", bikeReportService);
         this.bikeReportService = bikeReportService;
         this.authHelper = authHelper;
-
+        this.photoReportService = photoReportService;
         // Configurar layout principal
         setSizeFull();
         setAlignItems(Alignment.CENTER);
@@ -221,7 +224,42 @@ public class ReporteView extends VerticalLayout implements BeforeEnterObserver {
                         bike.purchaseDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A")
                 .setHeader("📅 Fecha de Compra").setWidth("120px");
 
+        grid.addComponentColumn(this::createPhotoReportButton)
+                .setHeader("📸 Fotos")
+                .setWidth("120px")
+                .setFlexGrow(0);
+
         return grid;
+    }
+
+    private Button createPhotoReportButton(BikeReportDTO bike) {
+        Button photoButton = new Button("📸 PDF", VaadinIcon.CAMERA.create());
+        photoButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
+        photoButton.setWidth("100px");
+
+        photoButton.addClickListener(event -> generatePhotoReport(bike.bikeId(), bike.brand(), bike.model()));
+
+        return photoButton;
+    }
+
+    private void generatePhotoReport(Long bikeId, String brand, String model) {
+        log.info("Generando reporte de fotos para bikeId: {}", bikeId);
+
+        try {
+            // Construir URL del endpoint
+            String apiUrl = "/api/reports/bike/" + bikeId + "/photos/pdf";
+
+            // Abrir en nueva pestaña para forzar descarga
+            getUI().ifPresent(ui -> ui.getPage().executeJs(
+                    "window.open($0, '_blank');", apiUrl
+            ));
+
+            showSuccessNotification("Generando reporte de fotos...");
+
+        } catch (Exception e) {
+            log.error("Error iniciando descarga para bikeId: {}", bikeId, e);
+            showErrorNotification("Error generando reporte de fotos: " + e.getMessage());
+        }
     }
 
     private void generatePdfReport() {
