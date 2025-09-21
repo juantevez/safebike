@@ -3,8 +3,10 @@ package com.safe.user.application.service;
 
 import com.safe.user.config.JwtUtil;
 import com.safe.user.infrastructure.adapters.output.external.TokenBlacklistService;
+import com.safe.user.infrastructure.adapters.output.persistence.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -12,11 +14,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import com.safe.user.domain.model.entity.User;
+
+
 
 @Service
 public class AuthService {
-
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
+    @Autowired
+    private UserRepository userRepository;
+
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
@@ -58,6 +66,22 @@ public class AuthService {
         } catch (Exception e) {
             logger.error("Error durante logout: {}", e.getMessage());
             // No lanzar excepción para logout, solo loggar
+        }
+    }
+
+    /**
+     * Obtiene el ID del usuario por su email
+     */
+    public Long getUserIdByEmail(String email) {
+        logger.info("Buscando userId para email: {}", email);
+
+        try {
+            return userRepository.findByEmail(email)
+                    .map(User::getId)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + email));
+        } catch (Exception e) {
+            logger.error("Error buscando usuario por email: {}", email, e);
+            throw e;
         }
     }
 

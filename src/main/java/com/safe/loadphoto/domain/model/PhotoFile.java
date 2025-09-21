@@ -5,14 +5,24 @@ public class PhotoFile {
     private String idExif;
     private String fileName;
     private byte[] fileData;
-
+    private Long bikeId;
+    private PhotoExif exif;
     public PhotoFile() {}
 
-    public PhotoFile(String id, String idExif, String fileName, byte[] fileData) {
+    public PhotoFile(String id, String idExif, String fileName, byte[] fileData, long bikeId, PhotoExif exif) {
         this.id = id;
         this.idExif = idExif;
         this.fileName = fileName;
         this.fileData = fileData;
+        this.bikeId = bikeId;
+        this.exif = exif;
+    }
+    public PhotoFile(String id, String idExif, String fileName, byte[] fileData, long bikeId) {
+        this.id = id;
+        this.idExif = idExif;
+        this.fileName = fileName;
+        this.fileData = fileData;
+        this.bikeId = bikeId;
     }
 
     // Getters y Setters
@@ -24,4 +34,20 @@ public class PhotoFile {
     public void setFileName(String fileName) { this.fileName = fileName; }
     public byte[] getFileData() { return fileData; }
     public void setFileData(byte[] fileData) { this.fileData = fileData; }
+
+    public Long getBikeId() {
+        return bikeId;
+    }
+
+    public void setBikeId(Long bikeId) {
+        this.bikeId = bikeId;
+    }
+
+    public PhotoExif getExif() {
+        return exif;
+    }
+
+    public void setExif(PhotoExif exif) {
+        this.exif = exif;
+    }
 }

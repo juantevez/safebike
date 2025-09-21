@@ -90,6 +90,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     }
 
     private void performLogin() {
+        logger.info("performLogin { 0 } " );
         String emailValue = email.getValue().trim();
         String passwordValue = password.getValue();
 
@@ -117,13 +118,29 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
             if (token != null && !token.trim().isEmpty()) {
                 logger.info("Login exitoso para usuario: {}", emailValue);
 
-                // Con esto (manejo directo de sesión):
-                getUI().ifPresent(ui -> {
-                    ui.getSession().setAttribute("authToken", token);
-                    ui.getSession().setAttribute("userEmail", emailValue);
+                // OBTENER USER ID Y GUARDARLO EN SESIÓN
+                try {
+                    Long userId = getUserIdByEmail(emailValue); // Método que necesitas agregar
 
-                    logger.info("Token y email guardados en sesión para usuario: {}", emailValue);
-                });
+                    // Guardar todo en la sesión:
+                    getUI().ifPresent(ui -> {
+                        ui.getSession().setAttribute("authToken", token);
+                        ui.getSession().setAttribute("userEmail", emailValue);
+                        ui.getSession().setAttribute("userId", userId);  // ← NUEVA LÍNEA
+
+                        logger.info("Token, email y userId guardados en sesión para usuario: {} (ID: {})", emailValue, userId);
+                    });
+
+                } catch (Exception e) {
+                    logger.error("Error obteniendo userId para usuario {}: {}", emailValue, e.getMessage());
+
+                    // Guardar sin userId (fallback)
+                    getUI().ifPresent(ui -> {
+                        ui.getSession().setAttribute("authToken", token);
+                        ui.getSession().setAttribute("userEmail", emailValue);
+                        logger.warn("Sesión guardada sin userId para usuario: {}", emailValue);
+                    });
+                }
 
                 // Mostrar notificación de éxito
                 Notification.show("🎉 ¡Login exitoso!", 2000, Notification.Position.TOP_CENTER)
@@ -150,6 +167,13 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
             loginButton.setEnabled(true);
             loginButton.setText("Iniciar Sesión");
         }
+    }
+
+    // AGREGAR ESTE MÉTODO EN LoginView:
+    private Long getUserIdByEmail(String emailValue) {
+        logger.info("getUserIdByEmail {} ",emailValue );
+        return authService.getUserIdByEmail(emailValue);
+
     }
 
     private void showErrorNotification(String message) {

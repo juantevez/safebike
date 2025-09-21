@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/VAADIN/**", "/vaadinServlet/**", "/frontend/**").permitAll()
                         // ✅ REQUERIR autenticación para rutas protegidas
                         .requestMatchers("/bike-form", "/photo-upload", "/reports").authenticated()
+                        .requestMatchers("/api/reports/**").permitAll()
                         // ✅ Por defecto, todo lo demás requiere autenticación
                         .anyRequest().authenticated()
                 )

@@ -125,4 +125,12 @@ public class BikeReportService {
                     userFullName, totalBikes, getFormattedDate());
         }
     }
+
+    @Override
+    public String toString() {
+        return "BikeReportService{" +
+                "bikeReportUseCasePort=" + bikeReportUseCasePort +
+                ", bikeReportRepositoryPort=" + bikeReportRepositoryPort +
+                '}';
+    }
 }

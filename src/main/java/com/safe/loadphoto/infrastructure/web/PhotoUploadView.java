@@ -1,6 +1,7 @@
 package com.safe.loadphoto.infrastructure.web;
 
 
+import com.safe.bike.domain.model.Bike;
 import com.safe.bike.domain.model.dto.BikeForPhotoDTO;
 import com.safe.bike.infrastructure.persistence.bike.BikeJpaRepository;
 import com.safe.loadphoto.domain.model.PhotoExif;
@@ -262,12 +263,11 @@ public class PhotoUploadView extends VerticalLayout {
             processButton.setEnabled(false);
             processButton.setText("⏳ Procesando...");
 
-            // TODO: Aquí deberías obtener el bikeId real basado en la selección
-            // Por ahora usamos un ID simulado
-            //String selectedBike = bikeSelect.getValue();
+            BikeForPhotoDTO selectedBike = bikeSelect.getValue();
+            Long bikeId = selectedBike.getBikeId();
 
             PhotoExif photoExif = photoExifService.extractAndSaveExif(
-                    "uploaded", currentFileName, currentFileData);
+                    "uploaded", currentFileName, currentFileData, bikeId);
 
             if (photoExif != null) {
                 showExifData(photoExif);
