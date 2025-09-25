@@ -49,3 +49,21 @@ body {
         min-height: -webkit-fill-available;
     }
 }
+
+
+/* Estilos para formularios */
+.vaadin-form-layout,
+.vaadin-text-field,
+.vaadin-select,
+.vaadin-button {
+    font-family: 'Roboto', 'Ocean Sans', sans-serif;
+    font-size: 16px; /* Tamaño óptimo para legibilidad */
+    line-height: 1.5; /* Mejora la legibilidad */
+}
+
+/* Etiquetas de formularios */
+.vaadin-form-item label {
+    font-family: 'Roboto', 'Ocean Sans', sans-serif;
+    font-weight: 500; /* Un poco más de peso para destacar */
+    font-size: 18px;
+}

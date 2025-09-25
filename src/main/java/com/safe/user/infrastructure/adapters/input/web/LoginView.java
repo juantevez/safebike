@@ -50,7 +50,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     private void initializeComponents() {
         // Configurar campo de email
-        email.setPlaceholder("ejemplo@correo.com");
+        email.setPlaceholder("biker@correo.com");
         email.setAutofocus(true);
         email.setWidth("300px");
 

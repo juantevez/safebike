@@ -7,10 +7,14 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.safe.loadphoto.domain.model.PhotoExif;
 import com.safe.loadphoto.domain.model.PhotoFile;
+import com.safe.loadphoto.domain.model.response.ExifDataResponse;
+import com.safe.loadphoto.domain.model.response.HeicProcessingResponse;
 import com.safe.loadphoto.domain.port.in.PhotoExifServicePort;
 import com.safe.loadphoto.domain.port.out.PhotoExifRepositoryPort;
 import com.safe.loadphoto.domain.port.out.PhotoFileRepositoryPort;
 import com.safe.loadphoto.infrastructure.adapter.ExifAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -20,15 +24,17 @@ import java.util.UUID;
 
 @Service
 public class PhotoExifService implements PhotoExifServicePort {
-
+    private static final Logger logger = LoggerFactory.getLogger(PhotoExifService.class);
     private final ExifAdapter exifAdapter;
     private final PhotoExifRepositoryPort exifRepositoryPort;
     private final PhotoFileRepositoryPort fileRepositoryPort;
+    private final HeicProcessingService heicProcessingService;
 
-    public PhotoExifService(ExifAdapter exifAdapter, PhotoExifRepositoryPort exifRepositoryPort, PhotoFileRepositoryPort fileRepositoryPort) {
+    public PhotoExifService(ExifAdapter exifAdapter, PhotoExifRepositoryPort exifRepositoryPort, PhotoFileRepositoryPort fileRepositoryPort, HeicProcessingService heicProcessingService) {
         this.exifAdapter = exifAdapter;
         this.exifRepositoryPort = exifRepositoryPort;
         this.fileRepositoryPort = fileRepositoryPort;
+        this.heicProcessingService = heicProcessingService;
     }
 
 
@@ -39,29 +45,68 @@ public class PhotoExifService implements PhotoExifServicePort {
                 throw new IllegalArgumentException("File data cannot be null or empty");
             }
 
-            PhotoExif photoExif = extractExif(fileData);
+            PhotoExif photoExif;
+            byte[] finalImageData;
+            String finalFileName = fileName;
+
+            // Verificar si es archivo HEIC
+            if (isHeicFile(fileName)) {
+                logger.info("Procesando archivo HEIC: {}", fileName);
+
+                // Pasar el bikeId al servicio Golang
+                HeicProcessingResponse heicResponse = heicProcessingService.processHeicFile(fileData, fileName, bikeId);
+
+                if (!heicResponse.isSuccess()) {
+                    throw new RuntimeException("Error al procesar archivo HEIC: " + heicResponse.getMessage());
+                }
+
+                // Usar datos originales (ya que Golang no devuelve archivo convertido)
+                finalImageData = fileData;
+                finalFileName = fileName;
+
+                // Usar datos EXIF del servicio Golang
+                photoExif = createPhotoExifFromHeicResponse(heicResponse);
+
+            } else {
+                // Procesamiento normal para JPG/PNG
+                logger.info("Procesando archivo JPG/PNG: {}", fileName);
+                photoExif = extractExif(fileData);
+                finalImageData = fileData;
+            }
+
             if (photoExif == null) {
                 throw new IllegalStateException("Failed to extract EXIF data");
             }
 
             // Asigna ID y nombre de archivo
             photoExif.setId(UUID.randomUUID().toString());
-            photoExif.setFileName(fileName);
+            photoExif.setFileName(finalFileName);
 
             // Guarda EXIF
             PhotoExif savedExif = exifRepositoryPort.save(photoExif);
 
-            // Guarda archivo
-            PhotoFile photoFile = new PhotoFile(UUID.randomUUID().toString(), savedExif.getId(), fileName, fileData, bikeId);
+            // Guarda archivo (ahora puede ser JPG convertido desde HEIC)
+            PhotoFile photoFile = new PhotoFile(
+                    UUID.randomUUID().toString(),
+                    savedExif.getId(),
+                    finalFileName,
+                    finalImageData,
+                    bikeId
+            );
             fileRepositoryPort.save(photoFile);
 
             return savedExif;
+
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error processing file: {}", fileName, e);
             throw new RuntimeException("Error processing EXIF data or saving to database", e);
         }
     }
-
+    private boolean isHeicFile(String fileName) {
+        if (fileName == null) return false;
+        String extension = fileName.toLowerCase();
+        return extension.endsWith(".heic") || extension.endsWith(".heif");
+    }
 
     public PhotoExif extractExif(byte[] fileData) {
         try {
@@ -107,6 +152,21 @@ public class PhotoExifService implements PhotoExifServicePort {
         }
     }
 
+    private PhotoExif createPhotoExifFromHeicResponse(HeicProcessingResponse response) {
+        PhotoExif photoExif = new PhotoExif();
+
+        ExifDataResponse exifData = response.getExifData();
+        if (exifData != null) {
+            photoExif.setLatitude(exifData.getLatitude());
+            photoExif.setLongitude(exifData.getLongitude());
+            photoExif.setDateTime(exifData.getDateTime());
+            //photoExif.setMake(exifData.getCameraMaker());
+            //photoExif.setModel(exifData.getCameraModel());
+            // photoExif.setOrientation(...); // Si lo necesitas
+        }
+
+        return photoExif;
+    }
     @Override
     public Optional<PhotoExif> getPhotoById(String id) {
         return null;

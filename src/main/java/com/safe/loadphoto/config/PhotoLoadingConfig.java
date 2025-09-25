@@ -5,6 +5,7 @@ import com.safe.loadphoto.domain.port.in.PhotoExifServicePort;
 import com.safe.loadphoto.domain.port.out.PhotoExifRepositoryPort;
 import com.safe.loadphoto.domain.port.out.PhotoFileRepositoryPort;
 import com.safe.loadphoto.infrastructure.adapter.ExifAdapter;
+import com.safe.loadphoto.service.HeicProcessingService;
 import com.safe.loadphoto.service.PhotoExifService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,9 +17,10 @@ public class PhotoLoadingConfig {
     public PhotoExifServicePort photoExifService(
             ExifAdapter exifAdapter,
             PhotoExifRepositoryPort exifRepositoryPort,
-            PhotoFileRepositoryPort photoFileRepositoryPort
+            PhotoFileRepositoryPort photoFileRepositoryPort,
+            HeicProcessingService heicProcessingService
     ) {
-        return new PhotoExifService(exifAdapter, exifRepositoryPort, photoFileRepositoryPort);
+        return new PhotoExifService(exifAdapter, exifRepositoryPort, photoFileRepositoryPort, heicProcessingService);
     }
 
 }
