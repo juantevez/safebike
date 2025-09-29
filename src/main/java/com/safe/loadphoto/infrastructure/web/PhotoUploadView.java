@@ -134,7 +134,15 @@ public class PhotoUploadView extends VerticalLayout {
         buffer = new MemoryBuffer();
         upload = new Upload(buffer);
 
-        upload.setAcceptedFileTypes("image/jpeg", "image/jpg", "image/png");
+        upload.setAcceptedFileTypes(
+                "image/jpeg",
+                "image/jpg",
+                "image/png",
+                ".heic",
+                ".heif",
+                ".HEIC",
+                ".HEIF"
+        );
         upload.setMaxFiles(1);
         upload.setMaxFileSize(50 * 1024 * 1024); // 50MB - debe coincidir con la config
 
