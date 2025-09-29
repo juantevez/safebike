@@ -215,9 +215,9 @@ public class ReporteView extends VerticalLayout implements BeforeEnterObserver {
         grid.setMaxHeight("400px");
 
         // Configurar columnas con iconos
-        grid.addColumn(BikeReportDTO::bikeId).setHeader("🆔 ID").setWidth("80px");
+        //grid.addColumn(BikeReportDTO::bikeId).setHeader("🆔 ID").setWidth("80px");
         grid.addColumn(BikeReportDTO::brand).setHeader("🏭 Marca").setWidth("120px");
-        grid.addColumn(BikeReportDTO::type).setHeader("⚙️ Tipo").setWidth("100px");
+        //grid.addColumn(BikeReportDTO::type).setHeader("⚙️ Tipo").setWidth("100px");
         grid.addColumn(BikeReportDTO::model).setHeader("🚲 Modelo").setWidth("150px");
         grid.addColumn(BikeReportDTO::serialNumber).setHeader("📝 Número de Serie").setWidth("180px");
         grid.addColumn(bike -> bike.purchaseDate() != null ?
